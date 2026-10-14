@@ -7,7 +7,7 @@
 
 ## Scarica il launcher
 
-**[Apri la release v0.1.0](https://github.com/Domenico-lel/iDom-Hub/releases/tag/v0.1.0)** e scegli il file per il tuo computer:
+**[Apri l’ultima release](https://github.com/Domenico-lel/iDom-Hub/releases/latest)** e scegli il file per il tuo computer:
 
 | Computer | File |
 | --- | --- |
@@ -30,6 +30,12 @@ Durante la sostituzione viene mantenuta una copia per il ripristino. Se lo scamb
 
 Se la cartella non è scrivibile, il launcher mostra un errore senza chiedere privilegi amministrativi. Puoi spostare l’app in `~/Applications` e riprovare.
 
+## Interfaccia
+
+La versione 0.2.0 usa un layout compatto sul modello di ArtCraft Launcher: barra superiore, schede squadrate e azioni visibili. Scegli **Griglia** o **Tabella**, filtra per stato e cerca le app. Nelle impostazioni puoi scegliere tema chiaro, scuro o del sistema e attivare il controllo automatico. Le preferenze vengono conservate. Il testo dell’interfaccia non si seleziona; la ricerca resta un normale campo editabile.
+
+Se ci sono nuove versioni, **Aggiorna tutte** esegue gli aggiornamenti in sequenza. Per una copia di iVolume da collegare al launcher usa **Collega al launcher** nei dettagli.
+
 ## App disponibili
 
 | App | Funzione | Requisiti |
@@ -51,7 +57,7 @@ Non devi aggiornare iDom Launcher a ogni release delle due app:
 
 Gli utenti vedranno **Aggiorna**. Il launcher usa l’endpoint GitHub `releases/latest`, quindi segue l’ultima release stabile selezionata da GitHub.
 
-**iVolume:** la release iniziale usa il tag `iVolume`, senza numero. Per collegare una copia già installata, premi una volta **Reinstalla l’ultima release**. Da quel momento vengono confrontati anche identificativo della release, del file e checksum. Dalle prossime release usa tag numerici allineati alla versione del bundle.
+**iVolume:** la release iniziale usa il tag `iVolume`, senza numero. Per collegare una copia già installata, premi una volta **Collega al launcher** nei dettagli. Da quel momento vengono confrontati anche identificativo della release, del file e checksum. Dalle prossime release usa tag numerici allineati alla versione del bundle.
 
 ## Pubblicare una nuova versione del launcher
 
@@ -64,7 +70,7 @@ La procedura [Build and release](https://github.com/Domenico-lel/iDom-Hub/action
 
 Per una nuova versione incrementa `version` in `package.json`. Le release che hanno già i due installer corretti non vengono ricompilate. Una release con vecchi pacchetti separati viene aggiornata ai due installer: i file superflui vengono rimossi solo dopo il caricamento riuscito dei nuovi pacchetti. Le eventuali prerelease vengono convertite in release normali. Puoi avviare la procedura anche da **Actions → Build and release → Run workflow**. Un tag inviato manualmente deve corrispondere alla versione del package.
 
-La procedura usa il `GITHUB_TOKEN` temporaneo di Actions; non inserire token personali nel codice. Il permesso di scrittura è limitato al job che pubblica la release. I certificati di firma non sono configurati.
+La procedura usa il `GITHUB_TOKEN` temporaneo di Actions; non inserire token personali nel codice. Il permesso di scrittura è limitato ai job che gestiscono la release; le build hanno accesso in lettura. I certificati di firma non sono configurati.
 
 L’aggiornamento del **launcher stesso** non è ancora automatico: gli utenti scaricano il nuovo iDom Launcher da Releases. Gli aggiornamenti di iBlock e iVolume sono gestiti dal launcher.
 
@@ -105,3 +111,5 @@ Verificati su macOS: installazione delle release reali in una cartella isolata, 
 La build Windows viene eseguita su Actions; l’esecuzione su un PC reale resta da verificare. Firma, notarizzazione e ulteriori prove sui sistemi supportati restano da configurare per la distribuzione firmata.
 
 La finestra usa sandbox, isolamento del contesto e Content Security Policy restrittiva secondo la [documentazione Electron](https://www.electronjs.org/docs/latest/tutorial/security).
+
+I font Archivo, Inter e Geist Mono sono distribuiti con le relative licenze OFL, elencate in `THIRD_PARTY_NOTICES.md`.

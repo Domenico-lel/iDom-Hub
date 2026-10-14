@@ -13,7 +13,7 @@ else {
     manager=new Manager(app.getPath('userData'),event=>{if(win&&!win.isDestroyed())win.webContents.send('progress',event);});
     const local=pathToFileURL(path.join(__dirname,'../ui/index.html')).href;
     function create(){
-      win=new BrowserWindow({width:1120,height:900,minWidth:880,minHeight:650,title:'iDom Launcher',icon:path.join(__dirname,'../ui/assets/hub.png'),backgroundColor:'#101016',titleBarStyle:'hiddenInset',webPreferences:{preload:path.join(__dirname,'preload.cjs'),contextIsolation:true,nodeIntegration:false,sandbox:true}});
+      win=new BrowserWindow({width:1180,height:760,minWidth:760,minHeight:500,title:'iDom Launcher',icon:path.join(__dirname,'../ui/assets/hub.png'),backgroundColor:'#121316',titleBarStyle:process.platform==='darwin'?'hiddenInset':'default',trafficLightPosition:{x:14,y:17},webPreferences:{preload:path.join(__dirname,'preload.cjs'),contextIsolation:true,nodeIntegration:false,sandbox:true}});
       win.webContents.setWindowOpenHandler(()=>({action:'deny'}));
       win.webContents.on('will-navigate',e=>e.preventDefault());win.loadURL(local);
     }
@@ -23,6 +23,8 @@ else {
     });}
     handle('catalog',()=>manager.refresh());handle('install',id=>manager.install(id));handle('open',id=>manager.open(id));
     handle('repository',id=>shell.openExternal(`https://github.com/${manager.entry(id).repo}`));
+    handle('project',()=>shell.openExternal('https://github.com/Domenico-lel/iDom-Hub'));
+    handle('info',()=>({version:require('../package.json').version}));
     handle('applications',()=>shell.openPath(path.join(require('node:os').homedir(),'Applications')));
     create();app.on('activate',()=>{if(BrowserWindow.getAllWindows().length===0)create();});
   });
