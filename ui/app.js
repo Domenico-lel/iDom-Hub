@@ -56,7 +56,7 @@ function render(){
 async function refresh(){if(busy||checking||!window.hub)return;checking=true;render();try{state=await window.hub.catalog();lastCheck=new Date();}catch(e){notice(e.message);}finally{checking=false;render();}}
 async function installApps(apps){
   if(busy||checking||!window.hub)return;busy=true;notice('');render();const errors=[],done=[];
-  try{for(const a of apps){progress.set(a.id,{phase:'Preparazione',progress:0});render();try{state=await window.hub.install(a.id);done.push(a.name);}catch(e){errors.push(`${a.name}: ${e.message}`);state=await window.hub.catalog().catch(()=>state);}finally{progress.delete(a.id);render();}}lastCheck=new Date();notice([done.length?`${done.join(', ')} ${done.length===1?'è pronta':'sono pronte'}. Puoi aprire ${done.length===1?'l’app':'le app'} dal launcher.`:'',...errors].filter(Boolean).join('\n'));}finally{busy=false;render();}
+  try{for(const a of apps){progress.set(a.id,{phase:'Preparazione',progress:0});render();try{state={...await window.hub.install(a.id),launcher:state.launcher};done.push(a.name);}catch(e){errors.push(`${a.name}: ${e.message}`);state=await window.hub.catalog().catch(()=>state);}finally{progress.delete(a.id);render();}}lastCheck=new Date();notice([done.length?`${done.join(', ')} ${done.length===1?'è pronta':'sono pronte'}. Puoi aprire ${done.length===1?'l’app':'le app'} dal launcher.`:'',...errors].filter(Boolean).join('\n'));}finally{busy=false;render();}
 }
 async function openApp(a){try{await window.hub.open(a.id);}catch(e){notice(e.message);}}
 async function repository(id){try{if(id==='launcher')await window.hub.project();else await window.hub.repository(id);}catch(e){notice(e.message);}}
