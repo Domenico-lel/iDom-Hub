@@ -1,4 +1,4 @@
-## iDom Launcher 0.3.1
+## iDom Launcher 0.3.2
 
 Ora puoi aggiornare anche il launcher dal pulsante **Aggiorna e riavvia**.
 
@@ -7,17 +7,15 @@ Ora puoi aggiornare anche il launcher dal pulsante **Aggiorna e riavvia**.
 - **[macOS — Intel e Apple Silicon](https://github.com/Domenico-lel/iDom-Hub/releases/latest/download/iDom-Launcher-macOS.dmg)**: un solo DMG universale.
 - **[Windows 64 bit](https://github.com/Domenico-lel/iDom-Hub/releases/latest/download/iDom-Launcher-Windows.exe)**: installer EXE.
 
-Se usi già la 0.3.0, premi **Aggiorna e riavvia**. Con versioni precedenti, installa questa release con il DMG o l’EXE. I collegamenti Source code vengono aggiunti automaticamente da GitHub e non servono per installarlo.
+Su macOS installa questa correzione con il DMG se provieni dalle versioni 0.3.0 o 0.3.1. I collegamenti Source code vengono aggiunti automaticamente da GitHub e non servono per installarlo.
 
-### Novità
+### Correzione aggiornamento macOS
 
-- Nome dell’autore corretto: **Domenico Lella**.
-- Note delle release formattate con titoli, elenchi, grassetto, codice e link.
-- Dettagli coerenti: versione installata, versione disponibile, sistema richiesto e processori.
-- iVolume mostra **0.9.0**, verificata nel pacchetto, anziché usare il nome del tag come versione.
-- Spiegazione di Rosetta nei dettagli di iVolume e riepilogo della versione quando mancano note ufficiali.
-- README di iVolume aggiunto nel suo repository.
-- Il tasto **Aggiorna e riavvia** continua a gestire gli aggiornamenti del launcher.
+- Corretto il controllo della chiusura del launcher: gli spazi aggiunti da macOS alla data del processo non interrompono più l’installazione.
+- Il processo di aggiornamento attende davvero la chiusura prima di sostituire il bundle e riavviare il launcher.
+- Log delle fasi di verifica, sostituzione, riavvio e ripristino per diagnosticare eventuali errori.
+
+**Se usi la 0.3.0 o la 0.3.1, installa questa versione una volta con il DMG.** Il bug è nel processo di aggiornamento delle versioni già installate, quindi il loro pulsante non può correggere il problema da solo. Impostazioni e catalogo sono conservati.
 
 Su Mac avvia il launcher dalla cartella Applicazioni, fuori dal DMG. Su Windows usa l’installazione per il tuo utente. La cartella deve essere scrivibile.
 

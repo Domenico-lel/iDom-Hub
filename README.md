@@ -82,7 +82,7 @@ La procedura usa il `GITHUB_TOKEN` temporaneo di Actions; non inserire token per
 
 Dalla versione **0.3.0** il launcher controlla anche la propria release stabile. Quando ne esce una più recente compare **Aggiorna e riavvia**, con le novità e l’avanzamento del download. Il pacchetto viene verificato con SHA-256, installato e il launcher si riapre. Se la nuova versione non conferma l’avvio, viene ripristinata la copia precedente. Puoi annullare il download prima del riavvio.
 
-Installa la 0.3.0 una volta con il DMG o l’EXE: le versioni precedenti non includono questo pulsante. Su Mac avvia il launcher dalla cartella Applicazioni, fuori dal DMG; su Windows usa l’installazione per il tuo utente. La cartella deve essere scrivibile. Impostazioni e registro delle app rimangono nella stessa cartella dati.
+Su macOS, se usi la 0.3.0 o la 0.3.1, installa la **0.3.2** una volta con il DMG: corregge un errore del processo di aggiornamento presente nelle vecchie versioni. Le versioni precedenti alla 0.3.0 non includono il pulsante. Su Mac avvia il launcher dalla cartella Applicazioni, fuori dal DMG; su Windows usa l’installazione per il tuo utente. La cartella deve essere scrivibile. Impostazioni e registro delle app rimangono nella stessa cartella dati.
 
 **Aggiorna** sulle schede aggiorna iBlock e iVolume; **Aggiorna tutte** aggiorna le app del catalogo; **Aggiorna e riavvia** aggiorna il launcher. Il controllo automatico ogni 15 minuti vale per entrambi. Nessuna prerelease viene proposta.
 
@@ -119,7 +119,7 @@ pnpm run build:win --publish never
 
 Per altre app macOS aggiungi una voce al catalogo con i suoi metadati.
 
-Verificati su macOS: installazione delle release reali in una cartella isolata, sostituzione di iBlock, riconoscimento delle app esistenti, catalogo, filtri, dettagli e IPC. Nessuna app dell’utente è stata sostituita durante i test. Diciassette test automatici coprono versioni, asset, checksum, percorsi ZIP, cancellazione, conferma dell’avvio e ripristino.
+Verificati su macOS: installazione delle release reali in una cartella isolata, sostituzione di iBlock, riconoscimento delle app esistenti, catalogo, filtri, dettagli e IPC. Nessuna app dell’utente è stata sostituita durante i test. Diciotto test automatici coprono versioni, asset, checksum, percorsi ZIP, cancellazione, conferma dell’avvio e ripristino.
 
 La build Windows viene eseguita su Actions; l’esecuzione su un PC reale resta da verificare. Firma, notarizzazione e ulteriori prove sui sistemi supportati restano da configurare per la distribuzione firmata.
 
