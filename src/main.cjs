@@ -35,6 +35,7 @@ else {
     handle('launcher-cancel',()=>{updater.cancel();return true;});
     handle('ready',()=>updater.confirmLaunch());
     handle('repository',id=>shell.openExternal(`https://github.com/${manager.entry(id).repo}`));
+    handle('external',url=>{if(typeof url!=='string'||url.length>4096)throw Error('Link non valido.');const u=new URL(url);if(u.protocol!=='https:'||u.username||u.password)throw Error('Link non valido.');return shell.openExternal(u.href);});
     handle('project',()=>shell.openExternal('https://github.com/Domenico-lel/iDom-Hub'));
     handle('info',()=>({version:require('../package.json').version}));
     handle('applications',()=>shell.openPath(path.join(require('node:os').homedir(),'Applications')));

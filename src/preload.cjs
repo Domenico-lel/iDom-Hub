@@ -2,6 +2,7 @@ const {contextBridge,ipcRenderer}=require('electron');
 contextBridge.exposeInMainWorld('hub',{
   catalog:()=>ipcRenderer.invoke('catalog'), install:id=>ipcRenderer.invoke('install',id),
   open:id=>ipcRenderer.invoke('open',id),repository:id=>ipcRenderer.invoke('repository',id),
+  external:url=>ipcRenderer.invoke('external',url),
   project:()=>ipcRenderer.invoke('project'),
   info:()=>ipcRenderer.invoke('info'),
   updateLauncher:()=>ipcRenderer.invoke('launcher-update'),

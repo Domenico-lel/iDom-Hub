@@ -34,7 +34,12 @@ class Manager {
       let osCompatible=false;
       if(this.platform==='darwin'){const {stdout}=await run('/usr/bin/sw_vers',['-productVersion']);osCompatible=compareVersions(stdout.trim(),entry.minimum)>=0;}
       const update=r?.asset?needsUpdate(installed,r,records[entry.id]):false;
-      return {id:entry.id,name:entry.name,description:entry.description,category:entry.category,icon:entry.icon,minimum:entry.minimum,architectureNote:entry.architectureNote,installed,available:r?.asset?true:false,latest:r?.tag_name||null,notes:r?.body||'',update,osCompatible,error};
+      const metadataAsset=r?selectAsset(entry,r,'darwin'):null;
+      const known=entry.knownRelease?.digest===metadataAsset?.digest?entry.knownRelease:null;
+      const latestVersion=/^v?\d+(?:\.\d+)*$/.test(r?.tag_name||'')?r.tag_name.replace(/^v/,''):known?.version||null;
+      const architectures=known?.architectures||entry.architectures||(/Universale/i.test(metadataAsset?.name||'')?'Intel e Apple Silicon (universale)':null);
+      const publishedNotes=(r?.body||'').trim();
+      return {id:entry.id,name:entry.name,description:entry.description,category:entry.category,icon:entry.icon,minimum:entry.minimum,architectures,requiresRosetta:known?.requiresRosetta||false,latestVersion,notesSource:publishedNotes?'release':known?'catalog':'empty',installed,available:r?.asset?true:false,latest:r?.tag_name||null,notes:publishedNotes||(known?entry.releaseSummary:''),update,osCompatible,error};
     }));return {platform:this.platform,apps};
   }
   async running(entry){const {stdout}=await run('/bin/ps',['-axo','comm=']);return stdout.split('\n').some(x=>x.trim().includes(`/${entry.name}.app/Contents/MacOS/`));}

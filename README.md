@@ -1,7 +1,7 @@
 # iDom Launcher
 
 <p align="center"><img src="ui/assets/hub.png" width="120" alt="iDom Launcher"></p>
-<p align="center"><strong>Le tue app. Un unico posto.</strong><br>Il launcher di Domenico Colella per iBlock e iVolume.</p>
+<p align="center"><strong>Le tue app. Un unico posto.</strong><br>Il launcher di Domenico Lella per iBlock e iVolume.</p>
 
 [![Build and release](https://github.com/Domenico-lel/iDom-Hub/actions/workflows/release.yml/badge.svg)](https://github.com/Domenico-lel/iDom-Hub/actions/workflows/release.yml)
 
@@ -29,6 +29,12 @@
 Durante la sostituzione viene mantenuta una copia per il ripristino. Se lo scambio o il salvataggio del registro falliscono, viene ripristinata l’app precedente. Viene sostituito solo il bundle `.app`: impostazioni e progetti non vengono eliminati. macOS potrebbe chiedere nuovamente i permessi dopo un aggiornamento.
 
 Se la cartella non è scrivibile, il launcher mostra un errore senza chiedere privilegi amministrativi. Puoi spostare l’app in `~/Applications` e riprovare.
+
+## Dettagli delle applicazioni
+
+I dettagli distinguono la versione installata dalla versione disponibile, indicano sistema e processori e mostrano le note delle release con titoli, elenchi e link. Il tag GitHub resta usato per gli aggiornamenti, ma non viene presentato come numero di versione se non è numerico. Per il pacchetto iniziale di iVolume, il checksum verificato permette di mostrare la versione reale **0.9.0**. Quando mancano note ufficiali, il riepilogo del catalogo è indicato chiaramente.
+
+Rosetta permette ai Mac Apple Silicon di eseguire il pacchetto Intel di iVolume. Non serve per il launcher universale o per iBlock. [Informazioni Apple](https://support.apple.com/102527).
 
 ## Interfaccia
 
