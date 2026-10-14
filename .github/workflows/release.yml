@@ -40,7 +40,12 @@ jobs:
               gh release edit "$tag" --prerelease=false --latest --notes-file RELEASE_NOTES.md
               echo "Release $tag pubblicata come release normale; pacchetti conservati."
             fi
-            echo "build=false" >> "$GITHUB_OUTPUT"
+            assets="$(gh release view "$tag" --json assets --jq '[.assets[].name] | sort | join(",")')"
+            if [[ "$assets" == "iDom-Launcher-Windows.exe,iDom-Launcher-macOS.dmg" ]]; then
+              echo "build=false" >> "$GITHUB_OUTPUT"
+            else
+              echo "build=true" >> "$GITHUB_OUTPUT"
+            fi
           else
             echo "build=true" >> "$GITHUB_OUTPUT"
           fi
@@ -70,14 +75,18 @@ jobs:
       - run: pnpm run ${{ matrix.command }} --publish never
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: false
+      - name: Verify universal Mac executable
+        if: runner.os == 'macOS'
+        run: |
+          lipo -verify_arch x86_64 arm64 "dist/mac-universal/iDom Launcher.app/Contents/MacOS/iDom Launcher"
+          lipo -verify_arch x86_64 arm64 "dist/mac-universal/iDom Launcher.app/Contents/Frameworks/Electron Framework.framework/Versions/A/Electron Framework"
       - uses: actions/upload-artifact@v4
         with:
           name: launcher-${{ matrix.os }}
           if-no-files-found: error
           path: |
-            dist/*.dmg
-            dist/*.zip
-            dist/*.exe
+            dist/iDom-Launcher-macOS.dmg
+            dist/iDom-Launcher-Windows.exe
   publish:
     needs: build
     runs-on: ubuntu-latest
@@ -105,15 +114,27 @@ jobs:
             echo "Il tag deve corrispondere alla versione in package.json: $tag"
             exit 1
           fi
+          test -s release-assets/iDom-Launcher-macOS.dmg
+          test -s release-assets/iDom-Launcher-Windows.exe
+          sha256sum release-assets/iDom-Launcher-macOS.dmg release-assets/iDom-Launcher-Windows.exe
           if gh release view "$tag" >/dev/null 2>&1; then
-            echo "La release $tag esiste già. Incrementa package.json per pubblicarne una nuova."
-            exit 0
+            gh release upload "$tag" release-assets/iDom-Launcher-macOS.dmg release-assets/iDom-Launcher-Windows.exe --clobber
+          else
+            gh release create "$tag" release-assets/iDom-Launcher-macOS.dmg release-assets/iDom-Launcher-Windows.exe \
+              --target "$GITHUB_SHA" \
+              --title "iDom Launcher ${version}" \
+              --notes-file RELEASE_NOTES.md \
+              --latest
           fi
-          cd release-assets
-          sha256sum -- *.dmg *.zip *.exe > SHA256SUMS.txt
-          cd ..
-          gh release create "$tag" release-assets/* \
-            --target "$GITHUB_SHA" \
-            --title "iDom Hub ${version}" \
-            --notes-file RELEASE_NOTES.md \
-            --latest
+          # Remove obsolete downloads only after both replacement installers are uploaded.
+          gh release view "$tag" --json assets --jq '.assets[].name' > uploaded-assets.txt
+          grep -Fxq 'iDom-Launcher-macOS.dmg' uploaded-assets.txt
+          grep -Fxq 'iDom-Launcher-Windows.exe' uploaded-assets.txt
+          while IFS= read -r asset; do
+            if [[ "$asset" != "iDom-Launcher-macOS.dmg" && "$asset" != "iDom-Launcher-Windows.exe" ]]; then
+              gh release delete-asset "$tag" "$asset" --yes
+            fi
+          done < uploaded-assets.txt
+          gh release edit "$tag" --prerelease=false --latest --title "iDom Launcher ${version}" --notes-file RELEASE_NOTES.md
+          count="$(gh release view "$tag" --json assets --jq '.assets | length')"
+          test "$count" -eq 2

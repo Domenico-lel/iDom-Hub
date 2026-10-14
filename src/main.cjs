@@ -3,6 +3,8 @@ const path=require('node:path');
 const {pathToFileURL}=require('node:url');
 const {Manager}=require('./manager.cjs');
 let win,manager;
+// Keep existing installation records when the displayed launcher name changes.
+if(app.isPackaged)app.setPath('userData',path.join(app.getPath('appData'),'iDom Hub'));
 if(!app.requestSingleInstanceLock())app.quit();
 else {
   app.on('second-instance',()=>{win?.show();win?.focus();});
@@ -11,7 +13,7 @@ else {
     manager=new Manager(app.getPath('userData'),event=>{if(win&&!win.isDestroyed())win.webContents.send('progress',event);});
     const local=pathToFileURL(path.join(__dirname,'../ui/index.html')).href;
     function create(){
-      win=new BrowserWindow({width:1120,height:900,minWidth:880,minHeight:650,title:'iDom Hub',icon:path.join(__dirname,'../ui/assets/hub.png'),backgroundColor:'#101016',titleBarStyle:'hiddenInset',webPreferences:{preload:path.join(__dirname,'preload.cjs'),contextIsolation:true,nodeIntegration:false,sandbox:true}});
+      win=new BrowserWindow({width:1120,height:900,minWidth:880,minHeight:650,title:'iDom Launcher',icon:path.join(__dirname,'../ui/assets/hub.png'),backgroundColor:'#101016',titleBarStyle:'hiddenInset',webPreferences:{preload:path.join(__dirname,'preload.cjs'),contextIsolation:true,nodeIntegration:false,sandbox:true}});
       win.webContents.setWindowOpenHandler(()=>({action:'deny'}));
       win.webContents.on('will-navigate',e=>e.preventDefault());win.loadURL(local);
     }

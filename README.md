@@ -1,6 +1,6 @@
-# iDom Hub
+# iDom Launcher
 
-<p align="center"><img src="ui/assets/hub.png" width="120" alt="iDom Hub"></p>
+<p align="center"><img src="ui/assets/hub.png" width="120" alt="iDom Launcher"></p>
 <p align="center"><strong>Le tue app. Un unico posto.</strong><br>Il launcher di Domenico Colella per iBlock e iVolume.</p>
 
 [![Build and release](https://github.com/Domenico-lel/iDom-Hub/actions/workflows/release.yml/badge.svg)](https://github.com/Domenico-lel/iDom-Hub/actions/workflows/release.yml)
@@ -11,11 +11,10 @@
 
 | Computer | File |
 | --- | --- |
-| Mac Apple Silicon, M1/M2/M3/M4 e successivi | `iDom-Hub-0.1.0-mac-arm64.dmg` |
-| Mac Intel | `iDom-Hub-0.1.0-mac-x64.dmg` |
-| Windows 64 bit | `iDom-Hub-0.1.0-win-x64.exe` |
+| macOS — Intel e Apple Silicon, un unico file | [Scarica per macOS](https://github.com/Domenico-lel/iDom-Hub/releases/latest/download/iDom-Launcher-macOS.dmg) |
+| Windows 64 bit | [Scarica per Windows](https://github.com/Domenico-lel/iDom-Hub/releases/latest/download/iDom-Launcher-Windows.exe) |
 
-**Mac:** apri il DMG e trascina **iDom Hub** in Applicazioni. **Windows:** apri l’EXE e segui l’installazione guidata. Gli ZIP macOS sono un’alternativa al DMG; **Source code** contiene il codice, non l’app pronta.
+**Mac:** apri il DMG e trascina **iDom Launcher** in Applicazioni. **Windows:** apri l’EXE e segui l’installazione guidata. Ci sono soltanto due installer: `iDom-Launcher-macOS.dmg` e `iDom-Launcher-Windows.exe`. I collegamenti **Source code** vengono aggiunti automaticamente da GitHub per gli sviluppatori e non servono per installare il launcher.
 
 Questa è la **prima release**. Firma Developer ID, notarizzazione Apple e certificato Windows non sono ancora configurati: il sistema potrebbe mostrare avvisi all’avvio. Il launcher non disattiva Gatekeeper. Non servono account o token personali per usare i repository pubblici.
 
@@ -42,7 +41,7 @@ Il launcher è compilato per macOS e Windows. **Le due app attuali sono soltanto
 
 ## Pubblicare aggiornamenti di iBlock e iVolume
 
-Non devi aggiornare iDom Hub a ogni release delle due app:
+Non devi aggiornare iDom Launcher a ogni release delle due app:
 
 1. Nel repository dell’app aggiorna `CFBundleShortVersionString`, compila e mantieni lo stesso bundle identifier.
 2. Pubblica una **GitHub Release stabile**, con un nuovo tag numerico come `v2.3.4` o `v0.9.1`. Le draft e le prerelease non vengono usate dal catalogo.
@@ -60,14 +59,14 @@ La procedura [Build and release](https://github.com/Domenico-lel/iDom-Hub/action
 
 1. Modifica il codice, incrementa `version` in `package.json` e aggiorna `RELEASE_NOTES.md`.
 2. Pusha su `main`.
-3. GitHub Actions esegue i test e compila DMG/ZIP per Mac Intel e Apple Silicon e installer EXE per Windows x64.
-4. Se le build passano, crea il tag `vX.Y.Z`, pubblica una release normale e allega i pacchetti e `SHA256SUMS.txt`.
+3. GitHub Actions esegue i test e compila un unico DMG universale per Mac Intel e Apple Silicon e un installer EXE per Windows x64.
+4. Se le build passano, crea il tag `vX.Y.Z`, pubblica una release normale e allega soltanto i due installer. I checksum SHA-256 sono mostrati da GitHub accanto ai file.
 
-I pacchetti delle release esistenti non vengono sovrascritti: incrementa la versione per pubblicarne un’altra. Se una release esistente è marcata Pre-release, la procedura la converte in release normale conservando i download. Puoi avviare la procedura anche da **Actions → Build and release → Run workflow**. Un tag inviato manualmente deve corrispondere alla versione del package.
+Per una nuova versione incrementa `version` in `package.json`. Le release che hanno già i due installer corretti non vengono ricompilate. Una release con vecchi pacchetti separati viene aggiornata ai due installer: i file superflui vengono rimossi solo dopo il caricamento riuscito dei nuovi pacchetti. Le eventuali prerelease vengono convertite in release normali. Puoi avviare la procedura anche da **Actions → Build and release → Run workflow**. Un tag inviato manualmente deve corrispondere alla versione del package.
 
 La procedura usa il `GITHUB_TOKEN` temporaneo di Actions; non inserire token personali nel codice. Il permesso di scrittura è limitato al job che pubblica la release. I certificati di firma non sono configurati.
 
-L’aggiornamento del **launcher stesso** non è ancora automatico: gli utenti scaricano il nuovo iDom Hub da Releases. Gli aggiornamenti di iBlock e iVolume sono gestiti dal launcher.
+L’aggiornamento del **launcher stesso** non è ancora automatico: gli utenti scaricano il nuovo iDom Launcher da Releases. Gli aggiornamenti di iBlock e iVolume sono gestiti dal launcher.
 
 ## Sviluppo
 

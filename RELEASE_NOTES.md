@@ -1,14 +1,15 @@
-## iDom Hub 0.1.0 — Prima release
+## iDom Launcher 0.1.0 — Prima release
 
 Un unico launcher per scoprire, installare, aprire e aggiornare iBlock e iVolume.
 
-### Download
+### Download — scegli solo il tuo sistema
 
-- **Mac Apple Silicon (M1/M2/M3/M4 e successivi):** scarica `iDom-Hub-0.1.0-mac-arm64.dmg`.
-- **Mac Intel:** scarica `iDom-Hub-0.1.0-mac-x64.dmg`.
-- **Windows 64 bit:** scarica `iDom-Hub-0.1.0-win-x64.exe` per l’installazione guidata.
+- **[Scarica per macOS](https://github.com/Domenico-lel/iDom-Hub/releases/latest/download/iDom-Launcher-macOS.dmg)** — un unico DMG per Mac Intel e Apple Silicon.
+- **[Scarica per Windows](https://github.com/Domenico-lel/iDom-Hub/releases/latest/download/iDom-Launcher-Windows.exe)** — installer per Windows 64 bit.
 
-Gli ZIP macOS sono un’alternativa al DMG. Gli ZIP automatici **Source code** servono per lo sviluppo, non per installare il launcher. `SHA256SUMS.txt` contiene i checksum dei pacchetti.
+Su Mac apri il DMG e trascina iDom Launcher in Applicazioni. Su Windows apri l’EXE e segui l’installazione guidata.
+
+I due collegamenti **Source code** sono aggiunti automaticamente da GitHub per gli sviluppatori: non servono per installare l’app.
 
 ### Funzioni
 

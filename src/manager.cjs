@@ -25,7 +25,7 @@ class Manager {
     const apps=await Promise.all(catalog.map(async entry=>{
       const installed=await this.installed(entry);let error=null;this.releases.delete(entry.id);
       try {
-        const response=await fetch(`https://api.github.com/repos/${entry.repo}/releases/latest`,{headers:{'User-Agent':'Domenico-Hub','Accept':'application/vnd.github+json'},signal:AbortSignal.timeout(20000)});
+        const response=await fetch(`https://api.github.com/repos/${entry.repo}/releases/latest`,{headers:{'User-Agent':'iDom-Launcher','Accept':'application/vnd.github+json'},signal:AbortSignal.timeout(20000)});
         if(!response.ok)throw new Error(response.status===403||response.status===429?'Limite GitHub raggiunto. Riprova tra qualche minuto.':response.status===404?'Nessuna release pubblicata.':`GitHub: errore ${response.status}.`);
         const release=await response.json();const asset=selectAsset(entry,release,this.platform);this.releases.set(entry.id,{...release,asset});
       } catch(e){error=e.message;}
@@ -69,7 +69,7 @@ class Manager {
       const stage=path.join(dir,`.${entry.name}-hub-new.app`),backup=path.join(dir,`.${entry.name}-hub-backup.app`);
       await fs.rm(stage,{recursive:true,force:true});notify('Installazione',100);await run('/usr/bin/ditto',[source,stage]);
       // Preserve Gatekeeper checks even for archive-based installs.
-      const quarantine=`0081;${Math.floor(Date.now()/1000).toString(16)};Domenico Hub;`;
+      const quarantine=`0081;${Math.floor(Date.now()/1000).toString(16)};iDom Launcher;`;
       await run('/usr/bin/xattr',['-w','com.apple.quarantine',quarantine,stage]);
       if(await this.running(entry))throw new Error(`Chiudi ${entry.name} e riprova.`);
       await swap(target,stage,backup,async()=>{
