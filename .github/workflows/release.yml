@@ -78,8 +78,8 @@ jobs:
       - name: Verify universal Mac executable
         if: runner.os == 'macOS'
         run: |
-          lipo -verify_arch x86_64 arm64 "dist/mac-universal/iDom Launcher.app/Contents/MacOS/iDom Launcher"
-          lipo -verify_arch x86_64 arm64 "dist/mac-universal/iDom Launcher.app/Contents/Frameworks/Electron Framework.framework/Versions/A/Electron Framework"
+          lipo "dist/mac-universal/iDom Launcher.app/Contents/MacOS/iDom Launcher" -verify_arch x86_64 arm64
+          lipo "dist/mac-universal/iDom Launcher.app/Contents/Frameworks/Electron Framework.framework/Versions/A/Electron Framework" -verify_arch x86_64 arm64
       - uses: actions/upload-artifact@v4
         with:
           name: launcher-${{ matrix.os }}
