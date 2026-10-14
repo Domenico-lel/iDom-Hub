@@ -35,5 +35,9 @@ app.whenReady().then(async()=>{
     assert.deepEqual(await fs.readdir(invalid.root),[],'Failed preparation must clean the job');
     console.log('PASS Electron: installed Windows launcher accepted, ASAR backup byte-identical, invalid installation rejected and cleaned.');
   }catch(error){console.error(error);process.exitCode=1;}
-  finally{if(root)await fs.rm(root,{recursive:true,force:true});app.exit(process.exitCode||0);}
+  finally{
+    try{if(root)await fs.rm(root,{recursive:true,force:true});}
+    catch(error){console.error('Fixture cleanup failed:',error.message);process.exitCode=1;}
+    finally{app.exit(process.exitCode||0);}
+  }
 });
