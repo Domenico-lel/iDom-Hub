@@ -5,6 +5,12 @@
 
 [![Build and release](https://github.com/Domenico-lel/iDom-Hub/actions/workflows/release.yml/badge.svg)](https://github.com/Domenico-lel/iDom-Hub/actions/workflows/release.yml)
 
+## Correzione 1.0.1: aggiornamento Windows
+
+La versione **1.0.1** corregge un falso errore «Installa il launcher con il suo installer Windows» nelle copie già installate. Il controllo e la copia di ripristino ora usano l’archivio fisico `app.asar`, senza la virtualizzazione del filesystem di Electron. Un test nel runtime Electron verifica la preparazione e l’integrità della copia di ripristino a ogni build.
+
+Su Windows, le versioni **0.3.2 e 1.0.0** contengono il controllo difettoso: per ricevere questa correzione è necessario installare la **1.0.1** una volta con l’EXE. Da quella versione il pulsante può preparare gli aggiornamenti successivi.
+
 ## Novità della versione 1.0
 
 La versione **1.0.0** introduce il nuovo logo iDom: la D turchese su base scura, visibile nella barra superiore, nell’icona dell’app e negli installer macOS e Windows. Il logo fornito è conservato in `ui/assets/hub.png`; le icone di distribuzione sono in `build/`.
@@ -106,6 +112,7 @@ pnpm start
 
 ```sh
 pnpm test
+pnpm run test:electron
 pnpm run build:mac --publish never
 pnpm run build:win --publish never
 ```

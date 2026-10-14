@@ -1,21 +1,16 @@
-## iDom Launcher 1.0.0
+## iDom Launcher 1.0.1
 
-La versione 1.0 introduce il nuovo logo iDom, con la D turchese su base scura.
+### Correzione aggiornamento Windows
 
-### Novità
+- Corretto il falso errore «Installa il launcher con il suo installer Windows prima di aggiornarlo» anche quando il launcher è già installato.
+- Controllo dell’installazione e backup ora accedono al file fisico `app.asar`: Electron non lo interpreta più come una cartella virtuale durante queste operazioni.
+- Aggiunto un test nel runtime Electron per la preparazione dell’aggiornamento Windows, la copia identica dell’archivio e la pulizia dopo un errore. Eseguito nelle build Windows e macOS.
 
-- Nuovo logo nella barra superiore del launcher e nel README.
-- Icone aggiornate per l’app e gli installer Windows e macOS, derivate dall’immagine originale fornita.
-- Versione 1.0.0 visibile nell’interfaccia e nelle impostazioni.
-- README aggiornato con le novità della versione e i riferimenti agli asset del logo.
+**Windows: dalla 0.3.2 o dalla 1.0.0 installa la 1.0.1 una volta tramite l’EXE.** Il blocco è nel codice delle versioni già installate e non può essere corretto dal loro pulsante di aggiornamento. La nuova versione corregge il flusso per gli aggiornamenti successivi. Impostazioni e catalogo sono conservati.
 
 ### Download
 
-- **[macOS — Intel e Apple Silicon](https://github.com/Domenico-lel/iDom-Hub/releases/latest/download/iDom-Launcher-macOS.dmg)**: un solo DMG universale, macOS 13+.
-- **[Windows 64 bit](https://github.com/Domenico-lel/iDom-Hub/releases/latest/download/iDom-Launcher-Windows.exe)**: installer EXE per il tuo utente.
+- [macOS — Intel e Apple Silicon](https://github.com/Domenico-lel/iDom-Hub/releases/latest/download/iDom-Launcher-macOS.dmg), macOS 13+.
+- [Windows 64 bit](https://github.com/Domenico-lel/iDom-Hub/releases/latest/download/iDom-Launcher-Windows.exe).
 
-Puoi usare **Aggiorna e riavvia** dalla versione 0.3.2 del launcher. Se provieni dalla 0.3.0 o dalla 0.3.1 su macOS, installa questa versione una volta con il DMG: il processo di aggiornamento delle vecchie versioni contiene un errore corretto dalla 0.3.2. Impostazioni e catalogo sono conservati.
-
-Su Mac avvia il launcher dalla cartella Applicazioni, fuori dal DMG. La cartella di installazione deve essere scrivibile.
-
-Le app del catalogo iBlock e iVolume sono ancora solo macOS. iVolume richiede macOS 14.2+ e Rosetta su Apple Silicon. Firma Developer ID, notarizzazione Apple e certificato Windows non sono configurati. L’esecuzione completa dell’aggiornamento su un PC Windows reale resta da verificare.
+Su macOS, dalle versioni 0.3.0 e 0.3.1 usa il DMG per ricevere la precedente correzione del processo di aggiornamento. Firma Developer ID, notarizzazione Apple e certificato Windows non sono configurati. Le app iBlock e iVolume restano disponibili solo per macOS.

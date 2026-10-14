@@ -1,4 +1,7 @@
-const fs=require('node:fs/promises');
+// Electron treats app.asar as a virtual directory. Installation checks and
+// backups must operate on the physical archive, including its exact bytes.
+const nativeFs=process.versions.electron?require('original-fs'):require('node:fs');
+const fs=nativeFs.promises;
 const {createWriteStream}=require('node:fs');
 const path=require('node:path');
 const crypto=require('node:crypto');

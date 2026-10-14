@@ -72,6 +72,8 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm test
+      - run: pnpm exec install-electron
+      - run: pnpm run test:electron
       - name: Validate Windows update helper
         if: runner.os == 'Windows'
         shell: pwsh
