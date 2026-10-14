@@ -1,9 +1,15 @@
-# iDom Launcher
+# iDom Launcher 1.0
 
-<p align="center"><img src="ui/assets/hub.png" width="120" alt="iDom Launcher"></p>
+<p align="center"><img src="ui/assets/hub.png" width="160" alt="iDom Launcher"></p>
 <p align="center"><strong>Le tue app. Un unico posto.</strong><br>Il launcher di Domenico Lella per iBlock e iVolume.</p>
 
 [![Build and release](https://github.com/Domenico-lel/iDom-Hub/actions/workflows/release.yml/badge.svg)](https://github.com/Domenico-lel/iDom-Hub/actions/workflows/release.yml)
+
+## Novità della versione 1.0
+
+La versione **1.0.0** introduce il nuovo logo iDom: la D turchese su base scura, visibile nella barra superiore, nell’icona dell’app e negli installer macOS e Windows. Il logo fornito è conservato in `ui/assets/hub.png`; le icone di distribuzione sono in `build/`.
+
+Restano disponibili il catalogo iBlock e iVolume, i temi chiaro e scuro, le viste Griglia e Tabella e l’aggiornamento del launcher con verifica SHA-256 e ripristino. Consulta le [note della versione 1.0.0](RELEASE_NOTES.md).
 
 ## Scarica il launcher
 
@@ -113,7 +119,7 @@ pnpm run build:win --publish never
 - `src/manager.cjs`: release, riconoscimento app, download e installazione macOS.
 - `src/swap.cjs`: sostituzione e ripristino.
 - `src/core.cjs`: versioni, checksum e percorsi ZIP.
-- `ui/`: interfaccia italiana con le icone originali.
+- `ui/`: interfaccia italiana con il nuovo logo iDom e le icone delle app.
 - `src/self-updater.cjs` e `src/update-helpers/`: controllo, download, riavvio e ripristino del launcher.
 - `tests/`: test per i casi critici.
 
