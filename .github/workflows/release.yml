@@ -72,12 +72,23 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm test
+      - name: Validate Windows update helper
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $errors = $null
+          [System.Management.Automation.Language.Parser]::ParseFile((Join-Path $PWD 'src/update-helpers/windows.ps1'), [ref]$null, [ref]$errors) | Out-Null
+          if ($errors.Count -gt 0) { $errors | Format-List; exit 1 }
+      - name: Validate Mac update helper
+        if: runner.os == 'macOS'
+        run: /bin/sh -n src/update-helpers/mac.sh
       - run: pnpm run ${{ matrix.command }} --publish never
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: false
       - name: Verify universal Mac executable
         if: runner.os == 'macOS'
         run: |
+          codesign --verify --deep --strict "dist/mac-universal/iDom Launcher.app"
           lipo "dist/mac-universal/iDom Launcher.app/Contents/MacOS/iDom Launcher" -verify_arch x86_64 arm64
           lipo "dist/mac-universal/iDom Launcher.app/Contents/Frameworks/Electron Framework.framework/Versions/A/Electron Framework" -verify_arch x86_64 arm64
       - uses: actions/upload-artifact@v4

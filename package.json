@@ -1,5 +1,5 @@
 {
-  "name": "idom-launcher", "version": "0.2.0", "private": true,
+  "name": "idom-launcher", "version": "0.3.0", "private": true,
   "description": "Il launcher di iBlock e iVolume", "author": "Domenico Colella", "packageManager": "pnpm@11.25.0",
   "main": "src/main.cjs",
   "scripts": {"start": "electron .", "test": "node --test tests/*.test.cjs", "build:mac": "electron-builder --mac dmg --universal", "build:win": "electron-builder --win nsis --x64"},
@@ -8,8 +8,8 @@
     "appId": "it.domenicolella.hub", "productName": "iDom Launcher",
     "directories": {"output": "dist"}, "files": ["src/**/*", "ui/**/*", "package.json"],
     "artifactName": "iDom-Launcher-${version}-${os}-${arch}.${ext}",
-    "mac": {"icon": "build/icon.icns", "category": "public.app-category.utilities", "target": "dmg", "artifactName": "iDom-Launcher-macOS.dmg", "minimumSystemVersion": "13.0"},
+    "mac": {"icon": "build/icon.icns", "identity": "-", "hardenedRuntime": false, "category": "public.app-category.utilities", "target": "dmg", "artifactName": "iDom-Launcher-macOS.dmg", "minimumSystemVersion": "13.0"},
     "win": {"icon": "build/icon.ico", "target": "nsis", "artifactName": "iDom-Launcher-Windows.exe", "signAndEditExecutable": false},
-    "nsis": {"oneClick": false, "perMachine": false, "allowToChangeInstallationDirectory": true, "createDesktopShortcut": true}
+    "nsis": {"oneClick": false, "perMachine": false, "allowElevation": false, "runAfterFinish": false, "allowToChangeInstallationDirectory": true, "createDesktopShortcut": true}
   }
 }

@@ -4,6 +4,10 @@ contextBridge.exposeInMainWorld('hub',{
   open:id=>ipcRenderer.invoke('open',id),repository:id=>ipcRenderer.invoke('repository',id),
   project:()=>ipcRenderer.invoke('project'),
   info:()=>ipcRenderer.invoke('info'),
+  updateLauncher:()=>ipcRenderer.invoke('launcher-update'),
+  cancelLauncherUpdate:()=>ipcRenderer.invoke('launcher-cancel'),
+  ready:()=>ipcRenderer.invoke('ready'),
   applications:()=>ipcRenderer.invoke('applications'),
-  onProgress:callback=>{const listener=(_e,data)=>callback(data);ipcRenderer.on('progress',listener);return ()=>ipcRenderer.removeListener('progress',listener);}
+  onProgress:callback=>{const listener=(_e,data)=>callback(data);ipcRenderer.on('progress',listener);return ()=>ipcRenderer.removeListener('progress',listener);},
+  onLauncherProgress:callback=>{const listener=(_e,data)=>callback(data);ipcRenderer.on('launcher-progress',listener);return ()=>ipcRenderer.removeListener('launcher-progress',listener);}
 });

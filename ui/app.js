@@ -1,5 +1,6 @@
 'use strict';
 let state=null,filter='all',mode=readSetting('view','grid'),busy=false,checking=false,selected=null,lastCheck=null;
+let updatingLauncher=false,launcherProgress=null,seenUpdateResult=null;
 const progress=new Map();
 const $=selector=>document.querySelector(selector);
 const colors={iblock:'#2d81ff',ivolume:'#925cf6'};
@@ -42,6 +43,7 @@ function renderRow(a){
 }
 function render(){
   if(!state)return;
+  renderLauncherUpdate();
   document.body.classList.toggle('mac',state.platform==='darwin');$('#platform').textContent=state.platform==='darwin'?'Per macOS':'Per Windows';
   for(const f of ['all','installed','updates','available']){const count=state.apps.filter(a=>inFilter(a,f)).length;$('#'+(f==='all'?'all':f==='available'?'available':f==='updates'?'update':'installed')+'-count').textContent=count;}
   document.querySelectorAll('[data-filter]').forEach(b=>{b.classList.toggle('active',b.dataset.filter===filter);b.setAttribute('aria-pressed',String(b.dataset.filter===filter));});
@@ -57,12 +59,36 @@ async function installApps(apps){
   try{for(const a of apps){progress.set(a.id,{phase:'Preparazione',progress:0});render();try{state=await window.hub.install(a.id);done.push(a.name);}catch(e){errors.push(`${a.name}: ${e.message}`);state=await window.hub.catalog().catch(()=>state);}finally{progress.delete(a.id);render();}}lastCheck=new Date();notice([done.length?`${done.join(', ')} ${done.length===1?'è pronta':'sono pronte'}. Puoi aprire ${done.length===1?'l’app':'le app'} dal launcher.`:'',...errors].filter(Boolean).join('\n'));}finally{busy=false;render();}
 }
 async function openApp(a){try{await window.hub.open(a.id);}catch(e){notice(e.message);}}
-async function repository(id){try{await window.hub.repository(id);}catch(e){notice(e.message);}}
+async function repository(id){try{if(id==='launcher')await window.hub.project();else await window.hub.repository(id);}catch(e){notice(e.message);}}
 async function project(){try{if(window.hub?.project)await window.hub.project();}catch(e){notice(e.message);}}
 function showDetails(a){
   selected=a;$('#detail-title').textContent=a.name;$('#detail-description').textContent=a.description;const meta=$('#detail-meta');meta.replaceChildren();for(const [label,value] of [['Installata',a.installed?.version||'Non installata'],['Ultima release',a.latest||'Non disponibile'],['Compatibilità',`macOS ${a.minimum}+`],...(a.architectureNote?[['Architettura',a.architectureNote]]:[]),...(a.error?[['Controllo release',a.error]]:[])])meta.append(el('dt','',label),el('dd','',value));$('#detail-notes').textContent=(a.notes||'').trim()||'Questa release non contiene note di aggiornamento.';$('#detail-reinstall').hidden=!(a.installed&&a.update===null&&a.available&&a.osCompatible);$('#detail-reinstall').disabled=busy||checking;if(!$('#details').open)$('#details').showModal();
 }
 function applyTheme(){const choice=$('#theme').value;const actual=choice==='system'?(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'):choice;document.documentElement.dataset.theme=actual;writeSetting('theme',choice);}
+function renderLauncherUpdate(){
+  const l=state?.launcher;
+  $('#launcher-update-banner').hidden=!(l?.available||updatingLauncher);
+  $('#launcher-update-title').textContent=l?.latest?`iDom Launcher ${l.latest} è disponibile`:'Aggiornamento di iDom Launcher';
+  $('#launcher-update-button').disabled=busy||checking||!l?.supported;
+  $('#launcher-update-button').textContent=updatingLauncher?'Aggiornamento in corso…':'Aggiorna e riavvia';
+  $('#launcher-update-cancel').hidden=!updatingLauncher||launcherProgress?.phase==='Riavvio';
+  $('#launcher-progress-caption').textContent=launcherProgress?`${launcherProgress.phase}${launcherProgress.phase==='Download'?` · ${launcherProgress.progress}%`:''}`:'';
+  $('#launcher-progress-track').hidden=!launcherProgress;
+  $('#launcher-progress-fill').style.width=(launcherProgress?.progress||0)+'%';
+  $('#launcher-check').disabled=busy||checking;
+  $('#launcher-status').textContent=l?.error?l.error:l?.available?`Versione ${l.current} · disponibile ${l.latest}`:`Versione ${l?.current||''} · il launcher è aggiornato`;
+  if(l?.available&&!l.supported)$('#launcher-status').textContent+=' · usa la versione installata';
+  if(l?.result&&!l.result.success&&seenUpdateResult!==l.result.token){seenUpdateResult=l.result.token;notice(l.result.message);}
+}
+async function updateLauncher(){
+  if(busy||checking||!state?.launcher?.supported)return;
+  busy=true;updatingLauncher=true;launcherProgress={phase:'Preparazione',progress:0};notice('');render();
+  try{await window.hub.updateLauncher();}catch(e){busy=false;updatingLauncher=false;launcherProgress=null;notice(e.message);render();}
+}
+$('#launcher-update-button').addEventListener('click',updateLauncher);
+$('#launcher-update-cancel').addEventListener('click',()=>window.hub.cancelLauncherUpdate().catch(e=>notice(e.message)));
+$('#launcher-check').addEventListener('click',refresh);
+$('#launcher-update-notes').addEventListener('click',()=>{const l=state.launcher;showDetails({id:'launcher',name:'iDom Launcher',description:'Aggiornamento del launcher. Verrà scaricato, verificato e installato prima del riavvio.',installed:{version:l.current},latest:l.latest,minimum:'13.0',notes:l.notes||''});});
 $('#theme').value=readSetting('theme','system');if(!['system','dark','light'].includes($('#theme').value))$('#theme').value='system';applyTheme();$('#auto-check').checked=readSetting('auto-check','true')==='true';
 $('#theme').addEventListener('change',applyTheme);matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{if($('#theme').value==='system')applyTheme();});$('#auto-check').addEventListener('change',()=>writeSetting('auto-check',String($('#auto-check').checked)));
 $('#settings-open').addEventListener('click',()=>$('#settings').showModal());$('#settings-close').addEventListener('click',()=>$('#settings').close());$('#close-details').addEventListener('click',()=>$('#details').close());$('#detail-repo').addEventListener('click',()=>repository(selected.id));$('#detail-reinstall').addEventListener('click',()=>{$('#details').close();installApps([selected]);});
@@ -72,4 +98,6 @@ document.addEventListener('click',e=>{if(!e.target.closest('.card-menu,.square')
 const editable=target=>target instanceof Element&&!!target.closest('input,textarea,[contenteditable=true]');document.addEventListener('selectstart',e=>{if(!editable(e.target))e.preventDefault();});document.addEventListener('dragstart',e=>{if(!editable(e.target))e.preventDefault();});document.addEventListener('contextmenu',e=>{if(!editable(e.target))e.preventDefault();});
 document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='a'&&!editable(e.target))e.preventDefault();});
 if(window.hub?.info)window.hub.info().then(info=>{document.querySelector('footer .version').textContent='v'+info.version;$('#settings-version').textContent='iDom Launcher '+info.version+' · Domenico Colella';}).catch(()=>{});
+if(window.hub?.onLauncherProgress)window.hub.onLauncherProgress(p=>{launcherProgress=p;renderLauncherUpdate();});
+if(window.hub?.ready)window.hub.ready().catch(()=>{});
 if(window.hub){window.hub.onProgress(p=>{progress.set(p.id,p);document.querySelectorAll(`[data-action-for="${p.id}"]`).forEach(area=>{const a=state?.apps.find(a=>a.id===p.id);if(a)area.replaceChildren(phaseDisplay(a));});});refresh();setInterval(()=>{if($('#auto-check').checked)refresh();},15*60*1000);}else{notice('Anteprima dell’interfaccia. Per installare e aprire le app usa il launcher desktop.');state={platform:'darwin',apps:[{id:'iblock',name:'iBlock',description:'Blocca temporaneamente la tastiera e il puntatore per pulire il Mac.',category:'Utility',icon:'iblock.png',minimum:'13.0',latest:'v2.3.3',available:false,osCompatible:true},{id:'ivolume',name:'iVolume',description:'Regola separatamente il volume delle applicazioni sul Mac.',category:'Audio',icon:'ivolume.png',minimum:'14.2',latest:'iVolume',available:false,osCompatible:true,architectureNote:'Intel; Rosetta su Apple Silicon.'}]};render();}

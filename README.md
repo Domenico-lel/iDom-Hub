@@ -16,7 +16,7 @@
 
 **Mac:** apri il DMG e trascina **iDom Launcher** in Applicazioni. **Windows:** apri l’EXE e segui l’installazione guidata. Ci sono soltanto due installer: `iDom-Launcher-macOS.dmg` e `iDom-Launcher-Windows.exe`. I collegamenti **Source code** vengono aggiunti automaticamente da GitHub per gli sviluppatori e non servono per installare il launcher.
 
-Questa è la **prima release**. Firma Developer ID, notarizzazione Apple e certificato Windows non sono ancora configurati: il sistema potrebbe mostrare avvisi all’avvio. Il launcher non disattiva Gatekeeper. Non servono account o token personali per usare i repository pubblici.
+ Firma Developer ID, notarizzazione Apple e certificato Windows non sono ancora configurati: il sistema potrebbe mostrare avvisi all’avvio. Il launcher non disattiva Gatekeeper. Non servono account o token personali per usare i repository pubblici.
 
 ## Come funziona
 
@@ -32,7 +32,7 @@ Se la cartella non è scrivibile, il launcher mostra un errore senza chiedere pr
 
 ## Interfaccia
 
-La versione 0.2.0 usa un layout compatto sul modello di ArtCraft Launcher: barra superiore, schede squadrate e azioni visibili. Scegli **Griglia** o **Tabella**, filtra per stato e cerca le app. Nelle impostazioni puoi scegliere tema chiaro, scuro o del sistema e attivare il controllo automatico. Le preferenze vengono conservate. Il testo dell’interfaccia non si seleziona; la ricerca resta un normale campo editabile.
+Il launcher usa un layout compatto sul modello di ArtCraft Launcher: barra superiore, schede squadrate e azioni visibili. Scegli **Griglia** o **Tabella**, filtra per stato e cerca le app. Nelle impostazioni puoi scegliere tema chiaro, scuro o del sistema e attivare il controllo automatico. Le preferenze vengono conservate. Il testo dell’interfaccia non si seleziona; la ricerca resta un normale campo editabile.
 
 Se ci sono nuove versioni, **Aggiorna tutte** esegue gli aggiornamenti in sequenza. Per una copia di iVolume da collegare al launcher usa **Collega al launcher** nei dettagli.
 
@@ -72,7 +72,13 @@ Per una nuova versione incrementa `version` in `package.json`. Le release che ha
 
 La procedura usa il `GITHUB_TOKEN` temporaneo di Actions; non inserire token personali nel codice. Il permesso di scrittura è limitato ai job che gestiscono la release; le build hanno accesso in lettura. I certificati di firma non sono configurati.
 
-L’aggiornamento del **launcher stesso** non è ancora automatico: gli utenti scaricano il nuovo iDom Launcher da Releases. Gli aggiornamenti di iBlock e iVolume sono gestiti dal launcher.
+## Aggiornare iDom Launcher
+
+Dalla versione **0.3.0** il launcher controlla anche la propria release stabile. Quando ne esce una più recente compare **Aggiorna e riavvia**, con le novità e l’avanzamento del download. Il pacchetto viene verificato con SHA-256, installato e il launcher si riapre. Se la nuova versione non conferma l’avvio, viene ripristinata la copia precedente. Puoi annullare il download prima del riavvio.
+
+Installa la 0.3.0 una volta con il DMG o l’EXE: le versioni precedenti non includono questo pulsante. Su Mac avvia il launcher dalla cartella Applicazioni, fuori dal DMG; su Windows usa l’installazione per il tuo utente. La cartella deve essere scrivibile. Impostazioni e registro delle app rimangono nella stessa cartella dati.
+
+**Aggiorna** sulle schede aggiorna iBlock e iVolume; **Aggiorna tutte** aggiorna le app del catalogo; **Aggiorna e riavvia** aggiorna il launcher. Il controllo automatico ogni 15 minuti vale per entrambi. Nessuna prerelease viene proposta.
 
 ## Sviluppo
 
@@ -102,11 +108,12 @@ pnpm run build:win --publish never
 - `src/swap.cjs`: sostituzione e ripristino.
 - `src/core.cjs`: versioni, checksum e percorsi ZIP.
 - `ui/`: interfaccia italiana con le icone originali.
-- `tests/`: dieci test per i casi critici.
+- `src/self-updater.cjs` e `src/update-helpers/`: controllo, download, riavvio e ripristino del launcher.
+- `tests/`: test per i casi critici.
 
 Per altre app macOS aggiungi una voce al catalogo con i suoi metadati.
 
-Verificati su macOS: installazione delle release reali in una cartella isolata, sostituzione di iBlock, riconoscimento delle app esistenti, catalogo, filtri, dettagli e IPC. Nessuna app dell’utente è stata sostituita durante i test. Dieci test automatici coprono versioni, asset, checksum, percorsi ZIP e ripristino.
+Verificati su macOS: installazione delle release reali in una cartella isolata, sostituzione di iBlock, riconoscimento delle app esistenti, catalogo, filtri, dettagli e IPC. Nessuna app dell’utente è stata sostituita durante i test. Diciassette test automatici coprono versioni, asset, checksum, percorsi ZIP, cancellazione, conferma dell’avvio e ripristino.
 
 La build Windows viene eseguita su Actions; l’esecuzione su un PC reale resta da verificare. Firma, notarizzazione e ulteriori prove sui sistemi supportati restano da configurare per la distribuzione firmata.
 
