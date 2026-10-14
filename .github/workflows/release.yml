@@ -10,7 +10,43 @@ concurrency:
   group: release-${{ github.ref }}
   cancel-in-progress: false
 jobs:
+  release-check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      build: ${{ steps.check.outputs.build }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - id: check
+        name: Check existing release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          version="$(node -p "require('./package.json').version")"
+          tag="v${version}"
+          if [[ "$GITHUB_REF" == refs/tags/* && "${GITHUB_REF#refs/tags/}" != "$tag" ]]; then
+            echo "Il tag deve corrispondere alla versione in package.json: $tag"
+            exit 1
+          fi
+          if gh release view "$tag" >/dev/null 2>&1; then
+            if [[ "$(gh release view "$tag" --json isPrerelease --jq .isPrerelease)" == "true" ]]; then
+              gh release edit "$tag" --prerelease=false --latest --notes-file RELEASE_NOTES.md
+              echo "Release $tag pubblicata come release normale; pacchetti conservati."
+            fi
+            echo "build=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "build=true" >> "$GITHUB_OUTPUT"
+          fi
   build:
+    needs: release-check
+    if: needs.release-check.outputs.build == 'true'
     strategy:
       fail-fast: false
       matrix:
@@ -56,7 +92,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - name: Publish versioned prerelease
+      - name: Publish versioned release
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
@@ -80,4 +116,4 @@ jobs:
             --target "$GITHUB_SHA" \
             --title "iDom Hub ${version}" \
             --notes-file RELEASE_NOTES.md \
-            --prerelease
+            --latest

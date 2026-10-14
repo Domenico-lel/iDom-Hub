@@ -1,4 +1,4 @@
-## iDom Hub 0.1.0 — Prima versione di prova
+## iDom Hub 0.1.0 — Prima release
 
 Un unico launcher per scoprire, installare, aprire e aggiornare iBlock e iVolume.
 

@@ -17,7 +17,7 @@
 
 **Mac:** apri il DMG e trascina **iDom Hub** in Applicazioni. **Windows:** apri l’EXE e segui l’installazione guidata. Gli ZIP macOS sono un’alternativa al DMG; **Source code** contiene il codice, non l’app pronta.
 
-Questa è una **versione di prova**. Firma Developer ID, notarizzazione Apple e certificato Windows non sono ancora configurati: il sistema potrebbe mostrare avvisi all’avvio. Il launcher non disattiva Gatekeeper. Non servono account o token personali per usare i repository pubblici.
+Questa è la **prima release**. Firma Developer ID, notarizzazione Apple e certificato Windows non sono ancora configurati: il sistema potrebbe mostrare avvisi all’avvio. Il launcher non disattiva Gatekeeper. Non servono account o token personali per usare i repository pubblici.
 
 ## Come funziona
 
@@ -61,9 +61,9 @@ La procedura [Build and release](https://github.com/Domenico-lel/iDom-Hub/action
 1. Modifica il codice, incrementa `version` in `package.json` e aggiorna `RELEASE_NOTES.md`.
 2. Pusha su `main`.
 3. GitHub Actions esegue i test e compila DMG/ZIP per Mac Intel e Apple Silicon e installer EXE per Windows x64.
-4. Se le build passano, crea il tag `vX.Y.Z`, pubblica una prerelease e allega i pacchetti e `SHA256SUMS.txt`.
+4. Se le build passano, crea il tag `vX.Y.Z`, pubblica una release normale e allega i pacchetti e `SHA256SUMS.txt`.
 
-Le release esistenti non vengono sovrascritte: incrementa la versione per pubblicarne un’altra. Puoi avviare la procedura anche da **Actions → Build and release → Run workflow**. Un tag inviato manualmente deve corrispondere alla versione del package.
+I pacchetti delle release esistenti non vengono sovrascritti: incrementa la versione per pubblicarne un’altra. Se una release esistente è marcata Pre-release, la procedura la converte in release normale conservando i download. Puoi avviare la procedura anche da **Actions → Build and release → Run workflow**. Un tag inviato manualmente deve corrispondere alla versione del package.
 
 La procedura usa il `GITHUB_TOKEN` temporaneo di Actions; non inserire token personali nel codice. Il permesso di scrittura è limitato al job che pubblica la release. I certificati di firma non sono configurati.
 
@@ -103,6 +103,6 @@ Per altre app macOS aggiungi una voce al catalogo con i suoi metadati.
 
 Verificati su macOS: installazione delle release reali in una cartella isolata, sostituzione di iBlock, riconoscimento delle app esistenti, catalogo, filtri, dettagli e IPC. Nessuna app dell’utente è stata sostituita durante i test. Dieci test automatici coprono versioni, asset, checksum, percorsi ZIP e ripristino.
 
-La build Windows viene eseguita su Actions; l’esecuzione su un PC reale resta da verificare. Prima di una release stabile servono firma, notarizzazione e ulteriori prove sui sistemi supportati.
+La build Windows viene eseguita su Actions; l’esecuzione su un PC reale resta da verificare. Firma, notarizzazione e ulteriori prove sui sistemi supportati restano da configurare per la distribuzione firmata.
 
 La finestra usa sandbox, isolamento del contesto e Content Security Policy restrittiva secondo la [documentazione Electron](https://www.electronjs.org/docs/latest/tutorial/security).
