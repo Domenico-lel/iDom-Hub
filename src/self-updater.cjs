@@ -54,8 +54,8 @@ function powershellBootstrap(commandFile){
   return Buffer.from(`$ErrorActionPreference='Stop'; $s=New-Object System.Diagnostics.ProcessStartInfo; $s.FileName=Join-Path $PSHOME 'powershell.exe'; $s.Arguments='-NoProfile -NonInteractive -EncodedCommand '+[IO.File]::ReadAllText('${file}'); $s.UseShellExecute=$true; $s.WindowStyle=[Diagnostics.ProcessWindowStyle]::Hidden; [Diagnostics.Process]::Start($s) | Out-Null`,'utf16le').toString('base64');
 }
 class SelfUpdater{
-  constructor({dataDir,version,platform=process.platform,packaged=false,execPath=process.execPath,pid=process.pid,bundleId='it.domenicolella.hub',emit=()=>{},fetchImpl=fetch,ackTimeout=90}){
-    Object.assign(this,{dataDir,version,platform,packaged,execPath,pid,bundleId,emit,fetchImpl,ackTimeout});this.root=path.join(dataDir,'self-updates');this.busy=false;this.restarting=false;this.latest=null;
+  constructor({dataDir,version,platform=process.platform,packaged=false,execPath=process.execPath,pid=process.pid,bundleId='it.domenicolella.hub',emit=()=>{},fetchImpl=fetch,ackTimeout=90,resourcesPath=process.resourcesPath}){
+    Object.assign(this,{dataDir,version,platform,packaged,execPath,pid,bundleId,emit,fetchImpl,ackTimeout,resourcesPath});this.root=path.join(dataDir,'self-updates');this.busy=false;this.restarting=false;this.latest=null;
   }
   async check(){
     if(this.checking)return this.checking;
@@ -135,12 +135,18 @@ class SelfUpdater{
   }
   async probe(dir){const file=path.join(dir,'.idom-write-'+crypto.randomUUID());try{await fs.writeFile(file,'',{flag:'wx',mode:0o600});await fs.rm(file);}catch{throw Error('Non puoi aggiornare questa cartella. Installa il launcher nella tua cartella Applicazioni o con l’installer per il tuo utente.');}}
   async bundleInfo(p){const {stdout}=await run('/usr/bin/plutil',['-convert','json','-o','-',path.join(p,'Contents','Info.plist')]);return JSON.parse(stdout);}
+  async helperScript(name){
+    const directory=this.packaged&&this.resourcesPath?path.join(this.resourcesPath,'update-helpers'):path.join(__dirname,'update-helpers');
+    // Packaged executables use physical resources. Development reads through
+    // Electron's ASAR-aware API too; never copy an archive member with original-fs.
+    return bundledFs.readFile(path.join(directory,name),'utf8');
+  }
   async launchHelper(plan){
     let executable,args;
     if(this.platform==='darwin'){
-      const helper=path.join(plan.job,'helper.sh');await fs.writeFile(helper,await bundledFs.readFile(path.join(__dirname,'update-helpers','mac.sh')),{mode:0o700});await fs.chmod(helper,0o700);executable='/bin/sh';args=[helper,plan.target,plan.stage,plan.backup,String(plan.parentPid),plan.parentStarted,plan.job,plan.version,plan.bundleId,String(plan.timeout),plan.token];
+      const helper=path.join(plan.job,'helper.sh');await fs.writeFile(helper,await this.helperScript('mac.sh'),{mode:0o700});await fs.chmod(helper,0o700);executable='/bin/sh';args=[helper,plan.target,plan.stage,plan.backup,String(plan.parentPid),plan.parentStarted,plan.job,plan.version,plan.bundleId,String(plan.timeout),plan.token];
     }else{
-      const script=await bundledFs.readFile(path.join(__dirname,'update-helpers','windows.ps1'),'utf8');
+      const script=await this.helperScript('windows.ps1');
       const commandFile=path.join(plan.job,'helper-command.txt');await fs.writeFile(commandFile,powershellCommand(script,plan.job),{mode:0o600});
       executable=path.join(process.env.SystemRoot||'C:\\Windows','System32','WindowsPowerShell','v1.0','powershell.exe');args=['-NoProfile','-NonInteractive','-EncodedCommand',powershellBootstrap(commandFile)];
     }

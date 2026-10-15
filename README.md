@@ -101,7 +101,7 @@ La procedura usa il `GITHUB_TOKEN` temporaneo di Actions; non inserire token per
 
 Dalla versione **0.3.0** il launcher controlla anche la propria release stabile. Quando ne esce una più recente compare **Aggiorna e riavvia**, con le novità e l’avanzamento del download. Il pacchetto viene verificato con SHA-256, installato e il launcher si riapre. Se la nuova versione non conferma l’avvio, viene ripristinata la copia precedente. Puoi annullare il download prima del riavvio.
 
-Su macOS, se usi la 0.3.0 o la 0.3.1, installa la **0.3.2** una volta con il DMG: corregge un errore del processo di aggiornamento presente nelle vecchie versioni. Le versioni precedenti alla 0.3.0 non includono il pulsante. Su Mac avvia il launcher dalla cartella Applicazioni, fuori dal DMG; su Windows usa l’installazione per il tuo utente. La cartella deve essere scrivibile. Impostazioni e registro delle app rimangono nella stessa cartella dati.
+Su macOS, se usi una versione fino alla **1.0.2**, installa la **1.0.5** una volta con il DMG: il vecchio processo non riesce a estrarre lo script da `app.asar` e non può correggersi da solo. Le versioni precedenti alla 0.3.0 non includono il pulsante. Su Mac avvia il launcher dalla cartella Applicazioni, fuori dal DMG; su Windows usa l’installazione per il tuo utente. La cartella deve essere scrivibile. Impostazioni e registro delle app rimangono nella stessa cartella dati.
 
 **Aggiorna** sulle schede aggiorna iBlock e iVolume; **Aggiorna tutte** aggiorna le app del catalogo; **Aggiorna e riavvia** aggiorna il launcher. Il controllo automatico ogni 15 minuti vale per entrambi. Nessuna prerelease viene proposta.
 
@@ -146,3 +146,7 @@ La build Windows viene eseguita su Actions; l’esecuzione su un PC reale resta 
 La finestra usa sandbox, isolamento del contesto e Content Security Policy restrittiva secondo la [documentazione Electron](https://www.electronjs.org/docs/latest/tutorial/security).
 
 I font Archivo, Inter e Geist Mono sono distribuiti con le relative licenze OFL, elencate in `THIRD_PARTY_NOTICES.md`.
+
+### Verifica dell’aggiornamento compilato su macOS
+
+Gli script nativi sono distribuiti come file fisici in `Contents/Resources/update-helpers`, fuori da `app.asar`. La pubblicazione richiede anche `pnpm run test:packaged-mac`: crea due copie temporanee del bundle compilato, apre la prima e clicca il pulsante reale. Verifica IPC, download con checksum, sostituzione, uscita del vecchio processo, riavvio del nuovo renderer e conferma dell’avvio. Profilo e bundle della prova sono isolati da quelli dell’utente.

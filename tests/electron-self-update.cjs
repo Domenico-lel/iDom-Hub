@@ -37,7 +37,8 @@ app.whenReady().then(async()=>{
     assert.deepEqual(await fs.readdir(invalid.root),[],'Failed preparation must clean the job');
     // Exercise the real helper from the shipped ASAR, without touching an installed app.
     // Deliberately invalid payload forces the safe failure path before replacement.
-    const helperUpdater=new SelfUpdater({...options,platform:process.platform});
+    const resourcesPath=archiveArgument?path.dirname(moduleRoot):path.join(moduleRoot,'src');
+    const helperUpdater=new SelfUpdater({...options,platform:process.platform,resourcesPath});
     const token=crypto.randomUUID(),job=path.join(helperUpdater.root,'job-'+token);
     await fs.mkdir(job,{recursive:true});
     const payload=path.join(job,'invalid-installer');await fs.writeFile(payload,'not an installer');

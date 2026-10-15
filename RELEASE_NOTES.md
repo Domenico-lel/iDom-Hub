@@ -1,3 +1,12 @@
+## iDom Launcher 1.0.5
+
+- Script di aggiornamento macOS e Windows distribuiti fuori da `app.asar`, come risorse fisiche del pacchetto.
+- Il launcher attende la conferma del processo di aggiornamento prima di chiudersi.
+- Nuova prova completa su macOS: clic reale sul pulsante del pacchetto compilato, download verificato, installazione, riavvio e conferma della nuova versione. Se fallisce, la release non viene pubblicata.
+- Conservate tutte le funzioni e il catalogo della 1.0.4, incluso Prompt Builder.
+
+**macOS: dalle versioni fino alla 1.0.2 serve una sostituzione iniziale con il DMG.** Il vecchio codice difettoso non può aggiornarsi da solo. Impostazioni e registro delle app restano conservati.
+
 ## iDom Launcher 1.0.4
 
 - La scheda Prompt Builder usa il logo originale: fumetto viola con stella rosa ombreggiata.

@@ -96,6 +96,9 @@ jobs:
       - name: Test update helper from packaged Mac ASAR
         if: runner.os == 'macOS'
         run: pnpm run test:electron "--archive=dist/mac-universal/iDom Launcher.app/Contents/Resources/app.asar"
+      - name: Complete packaged macOS update through renderer button
+        if: runner.os == 'macOS'
+        run: pnpm run test:packaged-mac
       - name: Verify universal Mac executable
         if: runner.os == 'macOS'
         run: |

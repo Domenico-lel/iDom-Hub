@@ -1,15 +1,68 @@
 {
-  "name": "idom-launcher", "version": "1.0.4", "private": true,
-  "description": "Il launcher di iBlock, iVolume e Prompt Builder", "author": "Domenico Lella", "packageManager": "pnpm@11.25.0",
+  "name": "idom-launcher",
+  "version": "1.0.5",
+  "private": true,
+  "description": "Il launcher di iBlock, iVolume e Prompt Builder",
+  "author": "Domenico Lella",
+  "packageManager": "pnpm@11.25.0",
   "main": "src/main.cjs",
-  "scripts": {"start": "electron .", "test": "node --test tests/*.test.cjs", "test:electron": "electron tests/electron-self-update.cjs", "test:helper-lifecycle": "node tests/helper-lifecycle.cjs", "build:mac": "electron-builder --mac dmg --universal", "build:win": "electron-builder --win nsis --x64"},
-  "devDependencies": {"electron": "44.7.2", "electron-builder": "26.15.3"},
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test tests/*.test.cjs",
+    "test:electron": "electron tests/electron-self-update.cjs",
+    "test:helper-lifecycle": "node tests/helper-lifecycle.cjs",
+    "build:mac": "electron-builder --mac dmg --universal",
+    "build:win": "electron-builder --win nsis --x64",
+    "test:packaged-mac": "node tests/packaged-mac-update.cjs"
+  },
+  "devDependencies": {
+    "electron": "44.7.2",
+    "electron-builder": "26.15.3"
+  },
   "build": {
-    "appId": "it.domenicolella.hub", "productName": "iDom Launcher",
-    "directories": {"output": "dist"}, "files": ["src/**/*", "ui/**/*", "package.json"],
+    "appId": "it.domenicolella.hub",
+    "productName": "iDom Launcher",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "src/**/*",
+      "ui/**/*",
+      "package.json"
+    ],
     "artifactName": "iDom-Launcher-${version}-${os}-${arch}.${ext}",
-    "mac": {"icon": "build/icon.icns", "identity": "-", "hardenedRuntime": false, "category": "public.app-category.utilities", "target": "dmg", "artifactName": "iDom-Launcher-macOS.dmg", "minimumSystemVersion": "13.0"},
-    "win": {"icon": "build/icon.ico", "target": "nsis", "artifactName": "iDom-Launcher-Windows.exe", "signExecutable": false},
-    "nsis": {"oneClick": false, "perMachine": false, "allowElevation": false, "runAfterFinish": false, "allowToChangeInstallationDirectory": true, "createDesktopShortcut": true}
+    "mac": {
+      "icon": "build/icon.icns",
+      "identity": "-",
+      "hardenedRuntime": false,
+      "category": "public.app-category.utilities",
+      "target": "dmg",
+      "artifactName": "iDom-Launcher-macOS.dmg",
+      "minimumSystemVersion": "13.0"
+    },
+    "win": {
+      "icon": "build/icon.ico",
+      "target": "nsis",
+      "artifactName": "iDom-Launcher-Windows.exe",
+      "signExecutable": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowElevation": false,
+      "runAfterFinish": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true
+    },
+    "extraResources": [
+      {
+        "from": "src/update-helpers",
+        "to": "update-helpers",
+        "filter": [
+          "*.sh",
+          "*.ps1"
+        ]
+      }
+    ]
   }
 }
