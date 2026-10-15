@@ -1,3 +1,8 @@
+## iDom Launcher 1.0.4
+
+- La scheda Prompt Builder usa il logo originale: fumetto viola con stella rosa ombreggiata.
+- Il colore della scheda è rosa, coerente con il marchio, sia nella griglia sia nella tabella.
+
 ## iDom Launcher 1.0.3
 
 - Corretto l’errore ENOENT durante la lettura degli script di aggiornamento dentro app.asar: i file interni usano il filesystem virtuale Electron, mentre il backup usa ancora i byte fisici dell’archivio.
