@@ -23,6 +23,7 @@ class Manager {
   async refresh(){
     const records=await this.records();
     const apps=await Promise.all(catalog.map(async entry=>{
+      if(entry.type==='web')return {id:entry.id,name:entry.name,description:entry.description,category:entry.category,icon:entry.icon,type:'web',url:entry.url,installed:null,available:true,osCompatible:true,update:false,error:null};
       const installed=await this.installed(entry);let error=null;this.releases.delete(entry.id);
       try {
         const response=await fetch(`https://api.github.com/repos/${entry.repo}/releases/latest`,{headers:{'User-Agent':'iDom-Launcher','Accept':'application/vnd.github+json'},signal:AbortSignal.timeout(20000)});
@@ -44,7 +45,7 @@ class Manager {
   }
   async running(entry){const {stdout}=await run('/bin/ps',['-axo','comm=']);return stdout.split('\n').some(x=>x.trim().includes(`/${entry.name}.app/Contents/MacOS/`));}
   async install(id){
-    const entry=this.entry(id);if(this.busy)throw new Error('Attendi il completamento dell’installazione in corso.');
+    const entry=this.entry(id);if(entry.type==='web')throw new Error('Questa app si usa nel browser e non richiede installazione.');if(this.busy)throw new Error('Attendi il completamento dell’installazione in corso.');
     if(this.platform!=='darwin')throw new Error('Questa applicazione è disponibile solo per macOS.');
     this.busy=true;let temp,mounted=false,mount;
     const notify=(phase,progress=0)=>this.emit({id,phase,progress});

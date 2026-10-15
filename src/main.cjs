@@ -25,7 +25,7 @@ else {
       return fn(...args);
     });}
     handle('catalog',async()=>{const [catalog,launcher]=await Promise.all([manager.refresh(),updater.check()]);return {...catalog,launcher};});
-    handle('install',id=>{if(updater.busy)throw Error('Attendi l’aggiornamento del launcher.');return manager.install(id);});handle('open',id=>manager.open(id));
+    handle('install',id=>{if(updater.busy)throw Error('Attendi l’aggiornamento del launcher.');return manager.install(id);});handle('open',id=>{const entry=manager.entry(id);return entry.type==='web'?shell.openExternal(entry.url):manager.open(id);});
     handle('launcher-update',async()=>{
       if(manager.busy)throw Error('Attendi il completamento dell’aggiornamento dell’app.');
       const plan=await updater.prepare();

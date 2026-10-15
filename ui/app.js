@@ -3,14 +3,15 @@ let state=null,filter='all',mode=readSetting('view','grid'),busy=false,checking=
 let updatingLauncher=false,launcherProgress=null,seenUpdateResult=null;
 const progress=new Map();
 const $=selector=>document.querySelector(selector);
-const colors={iblock:'#2d81ff',ivolume:'#925cf6'};
+const colors={'prompt-builder':'#27b6aa',iblock:'#2d81ff',ivolume:'#925cf6'};
 function readSetting(key,fallback){try{return localStorage.getItem('idom-'+key)||fallback;}catch{return fallback;}}
 function writeSetting(key,value){try{localStorage.setItem('idom-'+key,value);}catch{}}
 function el(tag,cls,text){const node=document.createElement(tag);if(cls)node.className=cls;if(text!==undefined)node.textContent=text;return node;}
 function button(cls,text,action){const node=el('button',cls,text);node.type='button';node.addEventListener('click',action);return node;}
 function notice(text){$('#notice').hidden=!text;$('#notice').textContent=text||'';}
-function inFilter(a,f){return f==='all'||f==='installed'&&!!a.installed||f==='updates'&&a.update===true||f==='available'&&!a.installed&&a.available&&a.osCompatible;}
+function inFilter(a,f){return f==='all'||f==='installed'&&!!a.installed||f==='updates'&&a.update===true||f==='available'&&a.type!=='web'&&!a.installed&&a.available&&a.osCompatible;}
 function appStatus(a){
+  if(a.type==='web')return {tone:'good',text:'App web · pronta all’uso'};
   if(progress.has(a.id))return {tone:'available',text:'Installazione in corso'};
   if(a.error)return {tone:'error',text:'Controllo non riuscito'};
   if(!a.osCompatible)return {tone:'unavailable',text:state.platform==='win32'?'Solo per macOS':`Richiede macOS ${a.minimum}`};
@@ -21,17 +22,17 @@ function appStatus(a){
   return {tone:'unavailable',text:'Release non disponibile'};
 }
 function badge(a){const s=appStatus(a);return el('span','status-badge '+s.tone,s.text);}
-function shortDescription(a){return a.id==='iblock'?'Blocca la tastiera per pulire il Mac':'Volume separato per ogni applicazione';}
+function shortDescription(a){if(a.type==='web')return a.description;return a.id==='iblock'?'Blocca la tastiera per pulire il Mac':'Volume separato per ogni applicazione';}
 function versionLabel(a){return a.latestVersion||(/^v?\d+(?:\.\d+)*$/.test(a.latest||'')?a.latest.replace(/^v/,''):null);}
-function compatibilityLabel(a){return a.id==='launcher'?(state.platform==='darwin'?'macOS 13 o successivo':'Windows 64 bit'):`macOS ${a.minimum} o successivo`;}
-function actionLabel(a){if(!a.osCompatible)return 'Non disponibile';if(a.installed&&a.update===true)return 'Aggiorna'+(versionLabel(a)?' a '+versionLabel(a):'');return a.installed?'Apri':'Installa';}
-function primary(a){const b=button('primary'+(a.installed&&a.update!==true?' open':''),actionLabel(a),()=>a.installed&&a.update!==true?openApp(a):installApps([a]));b.disabled=busy||checking||!window.hub||!a.osCompatible||(!a.installed&&!a.available);return b;}
+function compatibilityLabel(a){if(a.type==='web')return 'Browser web · macOS e Windows';return a.id==='launcher'?(state.platform==='darwin'?'macOS 13 o successivo':'Windows 64 bit'):`macOS ${a.minimum} o successivo`;}
+function actionLabel(a){if(a.type==='web')return 'Apri sito';if(!a.osCompatible)return 'Non disponibile';if(a.installed&&a.update===true)return 'Aggiorna'+(versionLabel(a)?' a '+versionLabel(a):'');return a.installed?'Apri':'Installa';}
+function primary(a){const b=button('primary'+(a.installed&&a.update!==true?' open':''),actionLabel(a),()=>a.type==='web'||a.installed&&a.update!==true?openApp(a):installApps([a]));b.disabled=busy||checking||!window.hub||!a.osCompatible||(!a.installed&&!a.available);return b;}
 function phaseDisplay(a){const p=progress.get(a.id);const area=el('div','progress-area');const caption=el('div','progress-caption',`${p.phase}${p.phase==='Download'?` · ${p.progress}%`:''}`);const track=el('div','progress-track'+(p.phase==='Download'?'':' indeterminate'));track.setAttribute('role','progressbar');track.setAttribute('aria-label',p.phase);if(p.phase==='Download'){track.setAttribute('aria-valuenow',String(p.progress));track.setAttribute('aria-valuemin','0');track.setAttribute('aria-valuemax','100');}const fill=el('div','progress-fill');if(p.phase==='Download')fill.style.width=p.progress+'%';track.append(fill);area.append(caption,track);return area;}
 function renderCard(a,index){
   const card=el('article','card');card.dataset.id=a.id;card.style.setProperty('--app-color',colors[a.id]||'#74aaff');
   const strip=el('div','card-strip');const links=el('div','strip-links');links.append(button('hud-link','Dettagli ↗',()=>showDetails(a)),button('hud-link','GitHub ↗',()=>repository(a.id)));strip.append(el('span','number',String(index+1).padStart(2,'0')),links);card.append(strip);
-  const content=el('div','card-content');const heading=el('div','app-heading');const icon=el('img','app-icon');icon.src='assets/'+a.icon;icon.alt='';icon.draggable=false;const title=button('title-button','',()=>showDetails(a));const h=el('h3');h.append(document.createTextNode('i'),el('span','',a.name.slice(1)));title.append(h,el('p','description',shortDescription(a)));heading.append(icon,title);content.append(heading,badge(a));
-  const version=a.installed?`${a.installed.version} installata${a.update===true?' → '+(versionLabel(a)||'nuova release')+' disponibile':''}`:`${versionLabel(a)?'Versione '+versionLabel(a):a.latest?'Release disponibile':'In attesa di una release'}`;const meta=el('p','meta',version);meta.append(el('small','',`macOS ${a.minimum}+${a.requiresRosetta?' · Intel (su Apple Silicon serve Rosetta)':a.architectures?' · '+a.architectures:''}`));content.append(meta);
+  const content=el('div','card-content');const heading=el('div','app-heading');const icon=el('img','app-icon');icon.src='assets/'+a.icon;icon.alt='';icon.draggable=false;const title=button('title-button','',()=>showDetails(a));const h=el('h3');h.append(document.createTextNode(a.name[0]),el('span','',a.name.slice(1)));title.append(h,el('p','description',shortDescription(a)));heading.append(icon,title);content.append(heading,badge(a));
+  const version=a.type==='web'?'Nessuna installazione richiesta':a.installed?`${a.installed.version} installata${a.update===true?' → '+(versionLabel(a)||'nuova release')+' disponibile':''}`:`${versionLabel(a)?'Versione '+versionLabel(a):a.latest?'Release disponibile':'In attesa di una release'}`;const meta=el('p','meta',version);meta.append(el('small','',a.type==='web'?'Si apre nel browser predefinito':`macOS ${a.minimum}+${a.requiresRosetta?' · Intel (su Apple Silicon serve Rosetta)':a.architectures?' · '+a.architectures:''}`));content.append(meta);
   const bottom=el('div','card-bottom');bottom.dataset.actionFor=a.id;
   if(progress.has(a.id)){bottom.append(phaseDisplay(a));}else{
     const menu=el('div','card-menu');menu.hidden=true;menu.setAttribute('role','menu');menu.append(button('','Dettagli dell’app',()=>{menu.hidden=true;showDetails(a);}),button('','Apri repository GitHub',()=>repository(a.id)));
@@ -41,7 +42,7 @@ function renderCard(a,index){
 }
 function renderRow(a){
   const row=el('tr');row.dataset.id=a.id;row.style.setProperty('--app-color',colors[a.id]);const cell=el('td');const info=el('div','table-app');const icon=el('img','table-icon');icon.src='assets/'+a.icon;icon.alt='';icon.draggable=false;const title=button('title-button','',()=>showDetails(a));title.append(el('div','table-name',a.name),el('div','table-category',a.category));info.append(icon,title);cell.append(info);const status=el('td');status.append(badge(a));const actions=el('td');const group=el('div','table-actions');group.dataset.actionFor=a.id;
-  if(progress.has(a.id)){group.classList.add('table-progress');group.append(phaseDisplay(a));}else {const more=button('square','↗',()=>showDetails(a));more.setAttribute('aria-label','Dettagli di '+a.name);group.append(primary(a),more);}actions.append(group);row.append(cell,status,el('td','version-cell',a.installed?.version||'—'),el('td','version-cell',versionLabel(a)||'Non indicata'),actions);return row;
+  if(progress.has(a.id)){group.classList.add('table-progress');group.append(phaseDisplay(a));}else {const more=button('square','↗',()=>showDetails(a));more.setAttribute('aria-label','Dettagli di '+a.name);group.append(primary(a),more);}actions.append(group);row.append(cell,status,el('td','version-cell',a.installed?.version||'—'),el('td','version-cell',a.type==='web'?'Online':versionLabel(a)||'Non indicata'),actions);return row;
 }
 function render(){
   if(!state)return;
@@ -66,16 +67,16 @@ async function project(){try{if(window.hub?.project)await window.hub.project();}
 function showDetails(a){
   selected=a;$('#detail-title').textContent=a.name;$('#detail-description').textContent=a.description;
   const meta=$('#detail-meta');meta.replaceChildren();
-  const entries=[['Versione installata',a.installed?.version||'Non installata'],['Versione disponibile',versionLabel(a)||'Non indicata'],['Sistema richiesto',compatibilityLabel(a)]];
+  const entries=a.type==='web'?[['Tipo','Applicazione web'],['Installazione','Non richiesta'],['Sito',a.url],['Sistema richiesto',compatibilityLabel(a)]]:[['Versione installata',a.installed?.version||'Non installata'],['Versione disponibile',versionLabel(a)||'Non indicata'],['Sistema richiesto',compatibilityLabel(a)]];
   if(a.architectures)entries.push(['Processori',a.architectures]);
   if(a.latest&&!versionLabel(a))entries.push(['Tag della release',a.latest]);
   if(a.error)entries.push(['Controllo aggiornamenti',a.error]);
   for(const [label,value] of entries)meta.append(el('dt','',label),el('dd','',value));
-  const help=$('#detail-compatibility');help.hidden=!(a.requiresRosetta||(state.platform==='win32'&&a.id!=='launcher'));
+  const help=$('#detail-compatibility');help.hidden=a.type==='web'||!(a.requiresRosetta||(state.platform==='win32'&&a.id!=='launcher'));
   help.textContent=state.platform==='win32'&&a.id!=='launcher'?'Questa applicazione è disponibile solo per macOS.': 'Sui Mac Intel funziona direttamente. Sui Mac Apple Silicon (M1, M2 e successivi) Rosetta permette di eseguire questa versione Intel. macOS può proporti di installarla al primo avvio.';
-  $('#detail-notes-heading').textContent=a.notesSource==='catalog'?'Informazioni sulla versione':'Note della release';
+  $('#detail-notes-heading').textContent=a.type==='web'?'Come usarla':a.notesSource==='catalog'?'Informazioni sulla versione':'Note della release';
   $('#detail-notes-source').hidden=a.notesSource!=='catalog';$('#detail-notes-source').textContent='Riepilogo verificato del pacchetto. La release GitHub non contiene note delle modifiche.';
-  ReleaseMarkdown.render($('#detail-notes'),a.notes?.trim()||'Non sono state pubblicate note per questa release.',url=>window.hub?.external(url).catch(e=>notice(e.message)));
+  ReleaseMarkdown.render($('#detail-notes'),a.type==='web'?'Premi **Apri sito** nella scheda per usare Prompt Builder nel browser predefinito. Non occorre installare nulla.':a.notes?.trim()||'Non sono state pubblicate note per questa release.',url=>window.hub?.external(url).catch(e=>notice(e.message)));
   $('#detail-notes').scrollTop=0;
   $('#detail-reinstall').hidden=!(a.installed&&a.update===null&&a.available&&a.osCompatible);$('#detail-reinstall').disabled=busy||checking;
   if(!$('#details').open)$('#details').showModal();
@@ -116,4 +117,4 @@ document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLower
 if(window.hub?.info)window.hub.info().then(info=>{document.querySelector('footer .version').textContent='v'+info.version;$('#settings-version').textContent='iDom Launcher '+info.version+' · Domenico Lella';}).catch(()=>{});
 if(window.hub?.onLauncherProgress)window.hub.onLauncherProgress(p=>{launcherProgress=p;renderLauncherUpdate();});
 if(window.hub?.ready)window.hub.ready().catch(()=>{});
-if(window.hub){window.hub.onProgress(p=>{progress.set(p.id,p);document.querySelectorAll(`[data-action-for="${p.id}"]`).forEach(area=>{const a=state?.apps.find(a=>a.id===p.id);if(a)area.replaceChildren(phaseDisplay(a));});});refresh();setInterval(()=>{if($('#auto-check').checked)refresh();},15*60*1000);}else{notice('Anteprima dell’interfaccia. Per installare e aprire le app usa il launcher desktop.');state={platform:'darwin',apps:[{id:'iblock',name:'iBlock',description:'Blocca temporaneamente la tastiera e il puntatore per pulire il Mac.',category:'Utility',icon:'iblock.png',minimum:'13.0',latest:'v2.3.3',available:false,osCompatible:true},{id:'ivolume',name:'iVolume',description:'Regola separatamente il volume delle applicazioni sul Mac.',category:'Audio',icon:'ivolume.png',minimum:'14.2',latest:'iVolume',available:false,osCompatible:true,architectureNote:'Intel; Rosetta su Apple Silicon.'}]};render();}
+if(window.hub){window.hub.onProgress(p=>{progress.set(p.id,p);document.querySelectorAll(`[data-action-for="${p.id}"]`).forEach(area=>{const a=state?.apps.find(a=>a.id===p.id);if(a)area.replaceChildren(phaseDisplay(a));});});refresh();setInterval(()=>{if($('#auto-check').checked)refresh();},15*60*1000);}else{notice('Anteprima dell’interfaccia. Per installare e aprire le app usa il launcher desktop.');state={platform:'darwin',apps:[{id:'prompt-builder',name:'Prompt Builder',description:'Crea e personalizza i tuoi prompt direttamente nel browser.',category:'Produttività',icon:'prompt-builder.svg',type:'web',url:'https://prompt-builder-cyan.vercel.app',available:true,osCompatible:true,update:false},{id:'iblock',name:'iBlock',description:'Blocca temporaneamente la tastiera e il puntatore per pulire il Mac.',category:'Utility',icon:'iblock.png',minimum:'13.0',latest:'v2.3.3',available:false,osCompatible:true},{id:'ivolume',name:'iVolume',description:'Regola separatamente il volume delle applicazioni sul Mac.',category:'Audio',icon:'ivolume.png',minimum:'14.2',latest:'iVolume',available:false,osCompatible:true,architectureNote:'Intel; Rosetta su Apple Silicon.'}]};render();}

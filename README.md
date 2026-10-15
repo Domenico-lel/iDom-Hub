@@ -58,10 +58,11 @@ Se ci sono nuove versioni, **Aggiorna tutte** esegue gli aggiornamenti in sequen
 
 | App | Funzione | Requisiti |
 | --- | --- | --- |
+| [Prompt Builder](https://prompt-builder-cyan.vercel.app) | Creazione e personalizzazione di prompt; **Apri sito** avvia il browser, senza installazione | Browser web su macOS e Windows |
 | [iBlock](https://github.com/Domenico-lel/iBlock) | Blocco temporaneo della tastiera e del puntatore per pulire il Mac | macOS 13+, Intel e Apple Silicon |
 | [iVolume](https://github.com/Domenico-lel/iVolume) | Volume separato per le applicazioni | macOS 14.2+; la release attuale è Intel e richiede Rosetta su Apple Silicon |
 
-Il launcher è compilato per macOS e Windows. **Le due app attuali sono soltanto macOS** e su Windows risultano non disponibili. L’adattatore per installare future app Windows dovrà essere aggiunto quando esisteranno i pacchetti, scegliendo tra EXE/MSI e ZIP portatili.
+Il launcher è compilato per macOS e Windows. **iBlock e iVolume sono soltanto macOS** e su Windows risultano non disponibili. L’adattatore per installare future app Windows dovrà essere aggiunto quando esisteranno i pacchetti, scegliendo tra EXE/MSI e ZIP portatili.
 
 ## Pubblicare aggiornamenti di iBlock e iVolume
 
