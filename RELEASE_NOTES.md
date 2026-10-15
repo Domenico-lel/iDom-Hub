@@ -1,3 +1,10 @@
+## iDom Launcher 1.0.6
+
+- Dettagli delle app dedicati a funzioni, casi d’uso e comandi utili.
+- Descrizioni specifiche per iBlock, iVolume e Prompt Builder, con titoli ed elenchi leggibili.
+- Rimosse dai dettagli le istruzioni di download e installazione già gestite dal launcher.
+- Conservate versione, compatibilità e note degli aggiornamenti del launcher.
+
 ## iDom Launcher 1.0.5
 
 - Script di aggiornamento macOS e Windows distribuiti fuori da `app.asar`, come risorse fisiche del pacchetto.

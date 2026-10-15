@@ -50,7 +50,7 @@ Se la cartella non è scrivibile, il launcher mostra un errore senza chiedere pr
 
 ## Dettagli delle applicazioni
 
-I dettagli distinguono la versione installata dalla versione disponibile, indicano sistema e processori e mostrano le note delle release con titoli, elenchi e link. Il tag GitHub resta usato per gli aggiornamenti, ma non viene presentato come numero di versione se non è numerico. Per il pacchetto iniziale di iVolume, il checksum verificato permette di mostrare la versione reale **0.9.0**. Quando mancano note ufficiali, il riepilogo del catalogo è indicato chiaramente.
+I dettagli spiegano cosa fa ogni applicazione, le funzioni principali e quando usarla, con titoli ed elenchi leggibili. Versioni, sistema e processori restano nella scheda tecnica. Le istruzioni di installazione e le note grezze delle release non vengono mostrate nei dettagli delle app. Le novità del launcher restano accessibili dal suo avviso di aggiornamento. Il tag GitHub resta usato per gli aggiornamenti, ma non viene presentato come numero di versione se non è numerico. Per il pacchetto iniziale di iVolume, il checksum verificato permette di mostrare la versione reale **0.9.0**. Le descrizioni funzionali si modificano nel campo `details` di `src/catalog.cjs`.
 
 Rosetta permette ai Mac Apple Silicon di eseguire il pacchetto Intel di iVolume. Non serve per il launcher universale o per iBlock. [Informazioni Apple](https://support.apple.com/102527).
 

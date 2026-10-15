@@ -67,16 +67,17 @@ async function project(){try{if(window.hub?.project)await window.hub.project();}
 function showDetails(a){
   selected=a;$('#detail-title').textContent=a.name;$('#detail-description').textContent=a.description;
   const meta=$('#detail-meta');meta.replaceChildren();
-  const entries=a.type==='web'?[['Tipo','Applicazione web'],['Installazione','Non richiesta'],['Sito',a.url],['Sistema richiesto',compatibilityLabel(a)]]:[['Versione installata',a.installed?.version||'Non installata'],['Versione disponibile',versionLabel(a)||'Non indicata'],['Sistema richiesto',compatibilityLabel(a)]];
+  const entries=a.type==='web'?[['Tipo','Applicazione web'],['Categoria',a.category||'Produttività'],['Sistema richiesto',compatibilityLabel(a)]]:[['Versione installata',a.installed?.version||'Non installata'],['Versione disponibile',versionLabel(a)||'Non indicata'],['Sistema richiesto',compatibilityLabel(a)]];
   if(a.architectures)entries.push(['Processori',a.architectures]);
   if(a.latest&&!versionLabel(a))entries.push(['Tag della release',a.latest]);
   if(a.error)entries.push(['Controllo aggiornamenti',a.error]);
   for(const [label,value] of entries)meta.append(el('dt','',label),el('dd','',value));
   const help=$('#detail-compatibility');help.hidden=a.type==='web'||!(a.requiresRosetta||(state.platform==='win32'&&a.id!=='launcher'));
   help.textContent=state.platform==='win32'&&a.id!=='launcher'?'Questa applicazione è disponibile solo per macOS.': 'Sui Mac Intel funziona direttamente. Sui Mac Apple Silicon (M1, M2 e successivi) Rosetta permette di eseguire questa versione Intel. macOS può proporti di installarla al primo avvio.';
-  $('#detail-notes-heading').textContent=a.type==='web'?'Come usarla':a.notesSource==='catalog'?'Informazioni sulla versione':'Note della release';
-  $('#detail-notes-source').hidden=a.notesSource!=='catalog';$('#detail-notes-source').textContent='Riepilogo verificato del pacchetto. La release GitHub non contiene note delle modifiche.';
-  ReleaseMarkdown.render($('#detail-notes'),a.type==='web'?'Premi **Apri sito** nella scheda per usare Prompt Builder nel browser predefinito. Non occorre installare nulla.':a.notes?.trim()||'Non sono state pubblicate note per questa release.',url=>window.hub?.external(url).catch(e=>notice(e.message)));
+  const isLauncher=a.id==='launcher';
+  $('#detail-notes-heading').textContent=isLauncher?'Novità della versione':'Funzioni e utilizzi';
+  $('#detail-notes-source').hidden=true;
+  ReleaseMarkdown.render($('#detail-notes'),isLauncher?(a.notes?.trim()||'Non sono state pubblicate note per questa versione.'):(a.details||a.description),url=>window.hub?.external(url).catch(e=>notice(e.message)));
   $('#detail-notes').scrollTop=0;
   $('#detail-reinstall').hidden=!(a.installed&&a.update===null&&a.available&&a.osCompatible);$('#detail-reinstall').disabled=busy||checking;
   if(!$('#details').open)$('#details').showModal();

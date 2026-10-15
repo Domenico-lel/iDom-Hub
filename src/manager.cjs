@@ -23,7 +23,7 @@ class Manager {
   async refresh(){
     const records=await this.records();
     const apps=await Promise.all(catalog.map(async entry=>{
-      if(entry.type==='web')return {id:entry.id,name:entry.name,description:entry.description,category:entry.category,icon:entry.icon,type:'web',url:entry.url,installed:null,available:true,osCompatible:true,update:false,error:null};
+      if(entry.type==='web')return {id:entry.id,name:entry.name,description:entry.description,details:entry.details,category:entry.category,icon:entry.icon,type:'web',url:entry.url,installed:null,available:true,osCompatible:true,update:false,error:null};
       const installed=await this.installed(entry);let error=null;this.releases.delete(entry.id);
       try {
         const response=await fetch(`https://api.github.com/repos/${entry.repo}/releases/latest`,{headers:{'User-Agent':'iDom-Launcher','Accept':'application/vnd.github+json'},signal:AbortSignal.timeout(20000)});
@@ -40,7 +40,7 @@ class Manager {
       const latestVersion=/^v?\d+(?:\.\d+)*$/.test(r?.tag_name||'')?r.tag_name.replace(/^v/,''):known?.version||null;
       const architectures=known?.architectures||entry.architectures||(/Universale/i.test(metadataAsset?.name||'')?'Intel e Apple Silicon (universale)':null);
       const publishedNotes=(r?.body||'').trim();
-      return {id:entry.id,name:entry.name,description:entry.description,category:entry.category,icon:entry.icon,minimum:entry.minimum,architectures,requiresRosetta:known?.requiresRosetta||false,latestVersion,notesSource:publishedNotes?'release':known?'catalog':'empty',installed,available:r?.asset?true:false,latest:r?.tag_name||null,notes:publishedNotes||(known?entry.releaseSummary:''),update,osCompatible,error};
+      return {id:entry.id,name:entry.name,description:entry.description,details:entry.details,category:entry.category,icon:entry.icon,minimum:entry.minimum,architectures,requiresRosetta:known?.requiresRosetta||false,latestVersion,notesSource:publishedNotes?'release':known?'catalog':'empty',installed,available:r?.asset?true:false,latest:r?.tag_name||null,notes:publishedNotes||'',update,osCompatible,error};
     }));return {platform:this.platform,apps};
   }
   async running(entry){const {stdout}=await run('/bin/ps',['-axo','comm=']);return stdout.split('\n').some(x=>x.trim().includes(`/${entry.name}.app/Contents/MacOS/`));}
