@@ -1,1 +1,13 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128"><rect width="128" height="128" rx="28" fill="#123b40"/><path d="M30 33h68v48H63L43 98V81H30z" fill="none" stroke="#69e6d0" stroke-width="7" stroke-linejoin="round"/><path d="m45 48 12 10-12 10m22 0h16" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 256 256" fill="none">
+<title>Scintilla di prompt — stella in rilievo</title>
+<desc>Fumetto viola con una stella rosa tridimensionale che supera i bordi superiore e destro.</desc>
+<defs>
+<linearGradient id="side" x1="52" y1="63" x2="213" y2="221" gradientUnits="userSpaceOnUse"><stop stop-color="#AA8BDD"/><stop offset="1" stop-color="#8262BA"/></linearGradient>
+<linearGradient id="face" x1="40" y1="57" x2="199" y2="196" gradientUnits="userSpaceOnUse"><stop stop-color="#D2B8F0"/><stop offset="1" stop-color="#A88AD9"/></linearGradient>
+<linearGradient id="starSide" x1="117" y1="42" x2="217" y2="150" gradientUnits="userSpaceOnUse"><stop stop-color="#D990C5"/><stop offset="1" stop-color="#B56DB4"/></linearGradient>
+<radialGradient id="star" cx="0.28" cy="0.22" r="0.9"><stop offset="0" stop-color="#FFE8F5"/><stop offset="0.35" stop-color="#F7C3E5"/><stop offset="0.68" stop-color="#ECA7D7"/><stop offset="1" stop-color="#C583C4"/></radialGradient>
+<path id="spark" d="M166 20C171 20 172 27 176 42C181 62 189 70 209 75C224 79 231 80 231 85C231 90 224 91 209 95C189 100 181 108 176 128C172 143 171 150 166 150C161 150 160 143 156 128C151 108 143 100 123 95C108 91 101 90 101 85C101 80 108 79 123 75C143 70 151 62 156 42C160 27 161 20 166 20Z"/>
+</defs>
+<path fill="url(#face)" d="M65 53H164C181.673 53 196 67.327 196 85V160C196 177.673 181.673 192 164 192H108L69 218C64 221.333 58 218 58 212V192C40.327 192 26 177.673 26 160V85C26 67.327 40.327 53 58 53Z"/>
+<use href="#spark" fill="url(#star)"/>
+</svg>

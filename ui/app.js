@@ -3,7 +3,7 @@ let state=null,filter='all',mode=readSetting('view','grid'),busy=false,checking=
 let updatingLauncher=false,launcherProgress=null,seenUpdateResult=null;
 const progress=new Map();
 const $=selector=>document.querySelector(selector);
-const colors={'prompt-builder':'#27b6aa',iblock:'#2d81ff',ivolume:'#925cf6'};
+const colors={'prompt-builder':'#eca7d7',iblock:'#2d81ff',ivolume:'#925cf6'};
 function readSetting(key,fallback){try{return localStorage.getItem('idom-'+key)||fallback;}catch{return fallback;}}
 function writeSetting(key,value){try{localStorage.setItem('idom-'+key,value);}catch{}}
 function el(tag,cls,text){const node=document.createElement(tag);if(cls)node.className=cls;if(text!==undefined)node.textContent=text;return node;}
