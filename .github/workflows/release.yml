@@ -74,6 +74,9 @@ jobs:
       - run: pnpm test
       - run: pnpm exec install-electron
       - run: pnpm run test:electron
+      - name: Verify Windows helper survives launcher exit
+        if: runner.os == 'Windows'
+        run: pnpm run test:helper-lifecycle
       - name: Validate Windows update helper
         if: runner.os == 'Windows'
         shell: pwsh
@@ -87,6 +90,12 @@ jobs:
       - run: pnpm run ${{ matrix.command }} --publish never
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: false
+      - name: Test update helper from packaged Windows ASAR
+        if: runner.os == 'Windows'
+        run: pnpm run test:electron --archive=dist/win-unpacked/resources/app.asar
+      - name: Test update helper from packaged Mac ASAR
+        if: runner.os == 'macOS'
+        run: pnpm run test:electron "--archive=dist/mac-universal/iDom Launcher.app/Contents/Resources/app.asar"
       - name: Verify universal Mac executable
         if: runner.os == 'macOS'
         run: |

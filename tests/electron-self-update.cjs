@@ -5,7 +5,9 @@ const path=require('node:path');
 const os=require('node:os');
 const crypto=require('node:crypto');
 const assert=require('node:assert/strict');
-const {SelfUpdater}=require('../src/self-updater.cjs');
+const archiveArgument=process.argv.find(arg=>arg.startsWith('--archive='));
+const moduleRoot=archiveArgument?path.resolve(archiveArgument.slice('--archive='.length)):path.join(__dirname,'..');
+const {SelfUpdater,atomicJson}=require(path.join(moduleRoot,'src/self-updater.cjs'));
 
 app.whenReady().then(async()=>{
   let root;
@@ -33,6 +35,29 @@ app.whenReady().then(async()=>{
     await assert.rejects(invalid.prepare(),/installer Windows/);
     assert.equal(invalid.busy,false);
     assert.deepEqual(await fs.readdir(invalid.root),[],'Failed preparation must clean the job');
+    // Exercise the real helper from the shipped ASAR, without touching an installed app.
+    // Deliberately invalid payload forces the safe failure path before replacement.
+    const helperUpdater=new SelfUpdater({...options,platform:process.platform});
+    const token=crypto.randomUUID(),job=path.join(helperUpdater.root,'job-'+token);
+    await fs.mkdir(job,{recursive:true});
+    const payload=path.join(job,'invalid-installer');await fs.writeFile(payload,'not an installer');
+    const result=path.join(helperUpdater.root,'last-result.json');
+    const helperPlan={job,token,version:'1.0.3',bundleId:'it.domenicolella.hub',target:path.join(root,'nonexistent','iDom Launcher.app'),stage:path.join(root,'missing-stage.app'),backup:path.join(root,'missing-backup'),archive:payload,digest:'0'.repeat(64),parentPid:2147483647,parentStarted:'',timeout:2,result};
+    await atomicJson(path.join(job,'manifest.json'),helperPlan);
+    await helperUpdater.launchHelper(helperPlan);
+    assert.equal(helperUpdater.restarting,true);
+    const deadline=Date.now()+20000;
+    let outcome;
+    while(Date.now()<deadline){
+      try{outcome=JSON.parse((await fs.readFile(result,'utf8')).replace(/^\uFEFF/,''));break;}catch{}
+      await new Promise(resolve=>setTimeout(resolve,100));
+    }
+    if(!outcome)console.error(await fs.readFile(path.join(job,'helper.log'),'utf8'));
+    assert.ok(outcome,'The real helper must execute and report a result');
+    assert.equal(outcome.token,token);
+    assert.equal(outcome.success,false,'Invalid payload must never be installed');
+    assert.equal((await fs.stat(path.join(job,'helper.log'))).isFile(),true);
+    console.log(`PASS helper executed from ${archiveArgument?'packaged ASAR':'source'} and refused invalid update safely.`);
     console.log('PASS Electron: installed Windows launcher accepted, ASAR backup byte-identical, invalid installation rejected and cleaned.');
   }catch(error){console.error(error);process.exitCode=1;}
   finally{

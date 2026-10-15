@@ -1,6 +1,7 @@
 param([string]$Job)
 $ErrorActionPreference = 'Stop'
 $m = Get-Content -LiteralPath (Join-Path $Job 'manifest.json') -Raw | ConvertFrom-Json
+[IO.File]::WriteAllText((Join-Path $Job 'ready.json'), (@{token=$m.token} | ConvertTo-Json -Compress))
 $changed = $false
 $candidate = $null
 $confirmed = $false
@@ -22,11 +23,15 @@ try {
     $remaining++
   }
   if ($remaining -eq 10) { throw 'Another launcher instance is running' }
-  if ((Get-FileHash -LiteralPath $m.archive -Algorithm SHA256).Hash.ToLowerInvariant() -ne $m.digest) { throw 'Installer checksum mismatch' }
+  $stream = [IO.File]::OpenRead($m.archive)
+  $sha = [Security.Cryptography.SHA256]::Create()
+  try { $actualDigest = [BitConverter]::ToString($sha.ComputeHash($stream)).Replace('-', '').ToLowerInvariant() }
+  finally { $stream.Dispose(); $sha.Dispose() }
+  if ($actualDigest -ne $m.digest) { throw 'Installer checksum mismatch' }
   $directory = Split-Path -Parent $m.target
   # NSIS requires /D last, with its full path unquoted even when it contains spaces.
   $changed = $true
-  $installer = Start-Process -FilePath $m.archive -ArgumentList ("/S /currentuser /D=" + $directory) -PassThru
+  $installer = Start-Process -FilePath $m.archive -ArgumentList ("/S /currentuser /D=" + $directory) -WindowStyle Hidden -PassThru
   if (-not $installer.WaitForExit(300000)) {
     $installer.Kill()
     $installer.WaitForExit()
@@ -55,7 +60,7 @@ try {
   }
   if ($changed) {
     try {
-      Copy-Item -Path (Join-Path $m.backup '*') -Destination (Split-Path -Parent $m.target) -Recurse -Force
+      Get-ChildItem -LiteralPath $m.backup -Force | ForEach-Object { Copy-Item -LiteralPath $_.FullName -Destination (Split-Path -Parent $m.target) -Recurse -Force }
       Write-Result $false 'Aggiornamento non riuscito. La versione precedente è stata ripristinata.'
     } catch {
       Write-Result $false 'Aggiornamento incompleto. Installa nuovamente il launcher con il suo installer.'
