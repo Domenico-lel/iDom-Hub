@@ -1,3 +1,12 @@
+## iDom Launcher 1.0.3
+
+- Corretto l’errore ENOENT durante la lettura degli script di aggiornamento dentro app.asar: i file interni usano il filesystem virtuale Electron, mentre il backup usa ancora i byte fisici dell’archivio.
+- Su Windows lo script viene avviato in un processo PowerShell indipendente e nascosto. Il launcher attende una conferma prima di chiudersi; gli errori di avvio sono registrati nel log.
+- Verificati l’avvio dello script dal pacchetto ASAR compilato e la sopravvivenza di PowerShell dopo la chiusura di Electron. Le verifiche ora bloccano la pubblicazione se falliscono.
+- Verifica SHA-256 Windows senza dipendere dal caricamento dei moduli PowerShell; ripristino compatibile con parentesi nei percorsi.
+
+**Dalle versioni 1.0.1 e 1.0.2 su Windows installa la 1.0.3 una volta con l’EXE.** Il codice difettoso è nella copia già installata e non può correggersi da solo. Impostazioni e catalogo sono conservati.
+
 ## iDom Launcher 1.0.2
 
 - Aggiunto Prompt Builder al catalogo come applicazione web, disponibile su macOS e Windows.

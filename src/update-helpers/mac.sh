@@ -7,6 +7,7 @@ exec >> "$job/helper.log" 2>&1
 moved=0; placed=0; success=0; candidate=''; phase='Attesa della chiusura'
 log() { printf '%s %s\n' "$(/bin/date -u '+%Y-%m-%dT%H:%M:%SZ')" "$*"; }
 log "Avvio aggiornamento $version"
+printf '{"token":"%s"}\n' "$token" > "$job/ready.json"
 write_result() {
   printf '{"version":"%s","token":"%s","success":%s,"message":"%s"}\n' "$version" "$token" "$1" "$2" > "$result.tmp"
   mv "$result.tmp" "$result"

@@ -5,6 +5,12 @@
 
 [![Build and release](https://github.com/Domenico-lel/iDom-Hub/actions/workflows/release.yml/badge.svg)](https://github.com/Domenico-lel/iDom-Hub/actions/workflows/release.yml)
 
+## Correzione 1.0.3: script di aggiornamento
+
+La **1.0.3** corregge la lettura degli script dentro `app.asar` e avvia PowerShell in un processo indipendente nascosto. Prima di chiudersi il launcher aspetta la conferma dello script. Le build verificano il vero script dal pacchetto compilato e, su Windows, la sopravvivenza del processo dopo la chiusura di Electron.
+
+**Se usi la 1.0.1 o la 1.0.2 su Windows, installa la 1.0.3 una volta tramite l’EXE:** il pulsante della vecchia copia contiene il difetto. Non occorre disinstallare o cancellare i dati.
+
 ## Correzione 1.0.1: aggiornamento Windows
 
 La versione **1.0.1** corregge un falso errore «Installa il launcher con il suo installer Windows» nelle copie già installate. Il controllo e la copia di ripristino ora usano l’archivio fisico `app.asar`, senza la virtualizzazione del filesystem di Electron. Un test nel runtime Electron verifica la preparazione e l’integrità della copia di ripristino a ogni build.

@@ -2,6 +2,9 @@
 // backups must operate on the physical archive, including its exact bytes.
 const nativeFs=process.versions.electron?require('original-fs'):require('node:fs');
 const fs=nativeFs.promises;
+// Scripts live INSIDE app.asar: read them through Electron's virtual filesystem.
+// Keep original-fs for physical installation files and byte-identical backups.
+const bundledFs=require('node:fs').promises;
 const {createWriteStream}=require('node:fs');
 const path=require('node:path');
 const crypto=require('node:crypto');
@@ -44,6 +47,12 @@ async function downloadVerified(asset,file,{fetchImpl=fetch,signal,emit=()=>{}}=
   }catch(e){await fs.rm(file,{force:true});throw e;}
 }
 function powershellCommand(script,job){return Buffer.from(`& {\n${script}\n} '${job.replace(/'/g,"''")}'`,'utf16le').toString('base64');}
+function powershellBootstrap(commandFile){
+  // ShellExecute creates an independent hidden console that survives Electron.
+  // DETACHED_PROCESS makes Windows PowerShell exit silently on some systems.
+  const file=commandFile.replace(/'/g,"''");
+  return Buffer.from(`$ErrorActionPreference='Stop'; $s=New-Object System.Diagnostics.ProcessStartInfo; $s.FileName=Join-Path $PSHOME 'powershell.exe'; $s.Arguments='-NoProfile -NonInteractive -EncodedCommand '+[IO.File]::ReadAllText('${file}'); $s.UseShellExecute=$true; $s.WindowStyle=[Diagnostics.ProcessWindowStyle]::Hidden; [Diagnostics.Process]::Start($s) | Out-Null`,'utf16le').toString('base64');
+}
 class SelfUpdater{
   constructor({dataDir,version,platform=process.platform,packaged=false,execPath=process.execPath,pid=process.pid,bundleId='it.domenicolella.hub',emit=()=>{},fetchImpl=fetch,ackTimeout=90}){
     Object.assign(this,{dataDir,version,platform,packaged,execPath,pid,bundleId,emit,fetchImpl,ackTimeout});this.root=path.join(dataDir,'self-updates');this.busy=false;this.restarting=false;this.latest=null;
@@ -129,14 +138,28 @@ class SelfUpdater{
   async launchHelper(plan){
     let executable,args;
     if(this.platform==='darwin'){
-      const helper=path.join(plan.job,'helper.sh');await fs.copyFile(path.join(__dirname,'update-helpers','mac.sh'),helper);await fs.chmod(helper,0o700);executable='/bin/sh';args=[helper,plan.target,plan.stage,plan.backup,String(plan.parentPid),plan.parentStarted,plan.job,plan.version,plan.bundleId,String(plan.timeout),plan.token];
+      const helper=path.join(plan.job,'helper.sh');await fs.writeFile(helper,await bundledFs.readFile(path.join(__dirname,'update-helpers','mac.sh')),{mode:0o700});await fs.chmod(helper,0o700);executable='/bin/sh';args=[helper,plan.target,plan.stage,plan.backup,String(plan.parentPid),plan.parentStarted,plan.job,plan.version,plan.bundleId,String(plan.timeout),plan.token];
     }else{
-      const script=await fs.readFile(path.join(__dirname,'update-helpers','windows.ps1'),'utf8');executable=path.join(process.env.SystemRoot||'C:\\Windows','System32','WindowsPowerShell','v1.0','powershell.exe');args=['-NoProfile','-NonInteractive','-EncodedCommand',powershellCommand(script,plan.job)];
+      const script=await bundledFs.readFile(path.join(__dirname,'update-helpers','windows.ps1'),'utf8');
+      const commandFile=path.join(plan.job,'helper-command.txt');await fs.writeFile(commandFile,powershellCommand(script,plan.job),{mode:0o600});
+      executable=path.join(process.env.SystemRoot||'C:\\Windows','System32','WindowsPowerShell','v1.0','powershell.exe');args=['-NoProfile','-NonInteractive','-EncodedCommand',powershellBootstrap(commandFile)];
     }
-    const child=spawn(executable,args,{detached:true,stdio:'ignore',windowsHide:true});
-    try{await new Promise((resolve,reject)=>{child.once('spawn',resolve);child.once('error',reject);});}catch(e){this.busy=false;await this.discard(plan);throw e;}
+    const log=await fs.open(path.join(plan.job,'helper.log'),'a');
+    let child;
+    try{child=spawn(executable,args,{detached:this.platform!=='win32',stdio:['ignore',log.fd,log.fd],windowsHide:true});await new Promise((resolve,reject)=>{child.once('spawn',resolve);child.once('error',reject);});}catch(e){this.busy=false;await this.discard(plan);throw e;}finally{await log.close();}
+    let failed=false;child.once('exit',code=>{failed=code!==0;});
+    try{
+      const deadline=Date.now()+15000;let ready=false;
+      while(Date.now()<deadline){
+        try{ready=(await readJson(path.join(plan.job,'ready.json'))).token===plan.token;}catch{}
+        if(ready)break;
+        if(failed)throw Error('Il processo di aggiornamento si è chiuso prima di essere pronto.');
+        await new Promise(resolve=>setTimeout(resolve,100));
+      }
+      if(!ready)throw Error('Il processo di aggiornamento non ha confermato l’avvio.');
+    }catch(e){child.kill();this.busy=false;throw e;}
     child.unref();this.restarting=true;this.emit({phase:'Riavvio',progress:100});return true;
   }
   async discard(plan){if(plan.stage)await fs.rm(plan.stage,{recursive:true,force:true}).catch(()=>{});await fs.rm(plan.job,{recursive:true,force:true}).catch(()=>{});this.busy=false;}
 }
-module.exports={SelfUpdater,releaseInfo,validateAsset,downloadVerified,powershellCommand,atomicJson};
+module.exports={SelfUpdater,releaseInfo,validateAsset,downloadVerified,powershellCommand,powershellBootstrap,atomicJson};
