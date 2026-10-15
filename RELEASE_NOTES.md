@@ -1,3 +1,9 @@
+## iDom Launcher 1.0.2
+
+- Aggiunto Prompt Builder al catalogo come applicazione web, disponibile su macOS e Windows.
+- Il pulsante **Apri sito** apre https://prompt-builder-cyan.vercel.app nel browser predefinito, senza installare nulla.
+- Scheda, tabella e dettagli distinguono le app web dalle app installabili; Prompt Builder non partecipa agli aggiornamenti delle app.
+
 ## iDom Launcher 1.0.1
 
 ### Correzione aggiornamento Windows
