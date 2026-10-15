@@ -34,7 +34,13 @@ require('./src/main.cjs');`;
    await run('/usr/bin/plutil',['-remove','ElectronAsarIntegrity',plist]).catch(()=>{});
    await run('/usr/bin/codesign',['--force','--deep','--sign','-',bundle]);await run('/usr/bin/codesign',['--verify','--deep','--strict',bundle]);
   }
-  await run('/usr/bin/hdiutil',['create','-quiet','-volname','iDom Update Test','-srcfolder',path.dirname(newApp),'-format','UDZO',image],{timeout:180000});
+  // DiskImages can return exit 1 just after electron-builder unmounts its DMG
+  // on hosted Mac runners. Use an explicit HFS+ fixture and retry creation only;
+  // never retry or skip a failed application update.
+  for(let attempt=0;attempt<3;attempt++){
+   try{await fs.rm(image,{force:true});await run('/usr/bin/hdiutil',['create','-ov','-volname','iDom Update Test','-fs','HFS+','-srcfolder',path.dirname(newApp),'-format','UDRO',image],{timeout:180000});break;}
+   catch(error){console.error('Fixture image creation:',error.stderr||error.message);if(attempt===2)throw error;await delay(3000);}
+  }
   const hash=crypto.createHash('sha256');for await(const chunk of createReadStream(image))hash.update(chunk);
   await fs.writeFile(releaseFile,JSON.stringify({tag_name:'v'+next,assets:[{name:'iDom-Launcher-macOS.dmg',size:(await fs.stat(image)).size,digest:'sha256:'+hash.digest('hex'),browser_download_url:`https://github.com/Domenico-lel/iDom-Hub/releases/download/v${next}/iDom-Launcher-macOS.dmg`}]}));
   parent=spawn(path.join(target,'Contents/MacOS/iDom Launcher'),[],{stdio:'ignore'});pids.push(parent.pid);
