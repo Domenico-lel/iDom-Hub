@@ -12,6 +12,7 @@ function manager(openError,signatureError,assessmentError){
     if(cmd==='/usr/sbin/spctl'&&assessmentError)throw assessmentError;
     return {stdout:'',stderr:''};
   }});
+  m.running=async()=>true;
   m.installed=async()=>({path:'/Users/example/Applications/iVolume.app',version:'0.10.0'});
   return {m,commands};
 }

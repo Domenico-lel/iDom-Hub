@@ -1,10 +1,9 @@
-## iDom Launcher 1.0.7
+## iDom Launcher 1.0.8
 
-- Guida al primo avvio dopo l’installazione o reinstallazione delle app macOS.
-- Gli avvisi di autorizzazione mostrano istruzioni leggibili invece dell’errore tecnico di apertura.
-- Pulsante per aprire Privacy e sicurezza e riprovare dopo aver premuto Apri comunque.
-- Guida sempre disponibile dal menu dell’app e dai Dettagli, anche nella vista Tabella.
-- I permessi audio e Accessibilità di iVolume sono spiegati separatamente.
-- Le app danneggiate o segnalate come pericolose non vengono indirizzate alla procedura di autorizzazione.
+- Primo avvio guidato in tre passi, con una sola azione principale alla volta, aiuto espandibile e conclusione quando l’app è rilevata in esecuzione.
+- Comandi Apri e Apri sito con la stessa evidenza nel catalogo.
+- Schede più essenziali: dettagli in un unico punto e repository delle app nei dettagli; un solo collegamento al progetto del launcher.
+- Testi, stati e metadati più grandi e leggibili nei temi chiaro e scuro.
+- Menu delle app utilizzabili con Tab ed Escape, focus restituito al pulsante di origine e ricerca rapida con Cmd+F o Ctrl+F.
 
-La conferma di apertura rimane nelle finestre di macOS. Il launcher conserva i controlli di sicurezza sui download.
+Restano disponibili la guida a Privacy e sicurezza e i permessi specifici di iVolume. L’autorizzazione all’apertura viene confermata nelle finestre di macOS.

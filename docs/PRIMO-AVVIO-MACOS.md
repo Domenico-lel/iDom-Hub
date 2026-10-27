@@ -4,7 +4,7 @@ La versione viene installata dal launcher, ma macOS può richiedere un’autoriz
 
 ## 1. Prova ad aprire iVolume
 
-Nel launcher premi **Apri** sulla scheda di iVolume.
+Nel launcher premi **Apri** sulla scheda di iVolume. Dopo un’installazione, la guida presenta un passo alla volta: **Apri iVolume**, **Apri Privacy e sicurezza**, poi **Ho autorizzato, riprova**. Puoi tornare al passo precedente con **Indietro**.
 
 Se compare un avviso perché lo sviluppatore non è verificato o Apple non può verificare l’app, chiudilo con **Fine**, **OK** o **Annulla**, a seconda della finestra mostrata. Questo primo tentativo permette a macOS di mostrare l’opzione di autorizzazione nelle impostazioni.
 
@@ -20,7 +20,7 @@ L’autorizzazione viene completata nelle finestre di macOS. Il launcher non ric
 
 ## 3. Torna al launcher
 
-Premi **Ho autorizzato, riprova**. Se l’app si è già aperta, puoi chiudere la guida. Le aperture successive della stessa app autorizzata avvengono normalmente; dopo una reinstallazione o un aggiornamento macOS può chiedere di ripetere la procedura.
+Premi **Ho autorizzato, riprova**. Quando il launcher rileva iVolume in esecuzione, la guida mostra il completamento e il pulsante **Torna alle app**. Se l’app si è già aperta, puoi anche chiudere la guida. Le aperture successive della stessa app autorizzata avvengono normalmente; dopo una reinstallazione o un aggiornamento macOS può chiedere di ripetere la procedura.
 
 Puoi ritrovare la guida nel menu **⋯ → Guida al primo avvio** della scheda dell’app, oppure nei suoi **Dettagli**. Compare anche dopo il completamento dell’installazione.
 

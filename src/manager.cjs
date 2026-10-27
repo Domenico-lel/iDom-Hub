@@ -93,7 +93,7 @@ class Manager {
     const e=this.entry(id),installed=await this.installed(e);
     if(!installed)return {status:'missing',message:`${e.name} non è più installata. Aggiorna il catalogo e installala di nuovo.`};
     if(this.platform!=='darwin')return {status:'failed',message:'Questa applicazione si apre solo su macOS.'};
-    try{await this.launchCommand('/usr/bin/open',[installed.path],{timeout:20000});return {status:'opened',id,name:e.name};}
+    try{await this.launchCommand('/usr/bin/open',[installed.path],{timeout:20000});let running=await this.running(e);for(let attempt=0;!running&&attempt<3;attempt++){await new Promise(resolve=>setTimeout(resolve,100));running=await this.running(e);}return {status:'opened',id,name:e.name,running};}
     catch(error){
       let signature={failed:false},assessment={rejected:false};
       try{await this.launchCommand('/usr/bin/codesign',['--verify','--deep','--strict',installed.path],{timeout:15000});}

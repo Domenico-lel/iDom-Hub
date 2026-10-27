@@ -154,3 +154,7 @@ Gli script nativi sono distribuiti come file fisici in `Contents/Resources/updat
 ## Primo avvio su macOS
 
 Dalla versione 1.0.7 il launcher mostra una guida dopo l’installazione o reinstallazione delle app. La guida è disponibile anche nel menu dell’app e nei Dettagli. Include il collegamento a Privacy e sicurezza e il pulsante per riprovare dopo l’autorizzazione. [Leggi la guida completa](docs/PRIMO-AVVIO-MACOS.md).
+
+## Interfaccia 1.0.8
+
+La guida mostra un passo alla volta e segnala quando l’app è in esecuzione. I comandi principali hanno la stessa evidenza, i repository sono nei dettagli e i testi del catalogo sono più leggibili. Usa Cmd+F (Mac) o Ctrl+F (Windows) per cercare; Tab per attraversare le azioni ed Escape per chiudere il menu restituendo il focus al suo pulsante.
