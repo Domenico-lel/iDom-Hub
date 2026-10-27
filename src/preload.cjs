@@ -9,6 +9,7 @@ contextBridge.exposeInMainWorld('hub',{
   cancelLauncherUpdate:()=>ipcRenderer.invoke('launcher-cancel'),
   ready:()=>ipcRenderer.invoke('ready'),
   applications:()=>ipcRenderer.invoke('applications'),
+  privacySecurity:()=>ipcRenderer.invoke('privacy-security'),
   onProgress:callback=>{const listener=(_e,data)=>callback(data);ipcRenderer.on('progress',listener);return ()=>ipcRenderer.removeListener('progress',listener);},
   onLauncherProgress:callback=>{const listener=(_e,data)=>callback(data);ipcRenderer.on('launcher-progress',listener);return ()=>ipcRenderer.removeListener('launcher-progress',listener);}
 });

@@ -150,3 +150,7 @@ I font Archivo, Inter e Geist Mono sono distribuiti con le relative licenze OFL,
 ### Verifica dell’aggiornamento compilato su macOS
 
 Gli script nativi sono distribuiti come file fisici in `Contents/Resources/update-helpers`, fuori da `app.asar`. La pubblicazione richiede anche `pnpm run test:packaged-mac`: crea due copie temporanee del bundle compilato, apre la prima e clicca il pulsante reale. Verifica IPC, download con checksum, sostituzione, uscita del vecchio processo, riavvio del nuovo renderer e conferma dell’avvio. Profilo e bundle della prova sono isolati da quelli dell’utente.
+
+## Primo avvio su macOS
+
+Dalla versione 1.0.7 il launcher mostra una guida dopo l’installazione o reinstallazione delle app. La guida è disponibile anche nel menu dell’app e nei Dettagli. Include il collegamento a Privacy e sicurezza e il pulsante per riprovare dopo l’autorizzazione. [Leggi la guida completa](docs/PRIMO-AVVIO-MACOS.md).

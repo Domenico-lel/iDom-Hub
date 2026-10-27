@@ -7,8 +7,9 @@ const run=promisify(execFile);
 const catalog=require('./catalog.cjs');
 const {compareVersions,selectAsset,needsUpdate,verifyDigest,validateArchivePaths}=require('./core.cjs');
 const {recover,swap}=require('./swap.cjs');
+const {classifyLaunchError}=require('./launch-guidance.cjs');
 class Manager {
-  constructor(dataDir, emit=()=>{}, platform=process.platform, installDirs=['/Applications',path.join(os.homedir(),'Applications')]) {this.dataDir=dataDir;this.emit=emit;this.platform=platform;this.installDirs=installDirs;this.releases=new Map();this.busy=false;}
+  constructor(dataDir, emit=()=>{}, platform=process.platform, installDirs=['/Applications',path.join(os.homedir(),'Applications')], operations={}) {this.dataDir=dataDir;this.emit=emit;this.platform=platform;this.installDirs=installDirs;this.releases=new Map();this.busy=false;this.launchCommand=operations.run||run;}
   entry(id) {const e=catalog.find(x=>x.id===id);if(!e)throw new Error('Applicazione sconosciuta.');return e;}
   async records(){try{return JSON.parse(await fs.readFile(path.join(this.dataDir,'installed.json'),'utf8'));}catch(e){if(e.code==='ENOENT')return {};throw new Error('Registro installazioni non leggibile.');}}
   async save(records){await fs.mkdir(this.dataDir,{recursive:true});const p=path.join(this.dataDir,'installed.json');await fs.writeFile(p+'.tmp',JSON.stringify(records,null,2));await fs.rename(p+'.tmp',p);}
@@ -88,6 +89,21 @@ class Manager {
     }
     return this.refresh();
   }
-  async open(id){const e=this.entry(id);const installed=await this.installed(e);if(!installed)throw new Error('Installa prima l’app.');await run('/usr/bin/open',[installed.path]);}
+  async open(id){
+    const e=this.entry(id),installed=await this.installed(e);
+    if(!installed)return {status:'missing',message:`${e.name} non è più installata. Aggiorna il catalogo e installala di nuovo.`};
+    if(this.platform!=='darwin')return {status:'failed',message:'Questa applicazione si apre solo su macOS.'};
+    try{await this.launchCommand('/usr/bin/open',[installed.path],{timeout:20000});return {status:'opened',id,name:e.name};}
+    catch(error){
+      let signature={failed:false},assessment={rejected:false};
+      try{await this.launchCommand('/usr/bin/codesign',['--verify','--deep','--strict',installed.path],{timeout:15000});}
+      catch(e){signature={failed:true,stderr:e.stderr||''};}
+      try{await this.launchCommand('/usr/sbin/spctl',['--assess','--type','execute','--verbose=2',installed.path],{timeout:20000});}
+      catch(e){assessment={rejected:e.code===3||/rejected/i.test(e.stderr||''),unavailable:!!e.killed||e.code==='ENOENT',stderr:e.stderr||''};}
+      const status=classifyLaunchError(error,assessment,signature);
+      const messages={authorization:`macOS non ha autorizzato l’apertura di ${e.name}. Segui i passaggi qui sotto.`,cancelled:`L’apertura di ${e.name} è stata annullata. Puoi riprovare; se macOS mostra un avviso, segui la guida.`,damaged:`Il pacchetto di ${e.name} risulta danneggiato o modificato. Scarica di nuovo l’app dalla release ufficiale.`,unsafe:`macOS ha segnalato un problema di sicurezza per ${e.name}. Non autorizzarne l’apertura: verifica la release con lo sviluppatore.`,failed:`Non è stato possibile aprire ${e.name}. Riprova oppure verifica l’app nella cartella Applicazioni.`};
+      return {status,id,name:e.name,message:messages[status]};
+    }
+  }
 }
 module.exports={Manager};

@@ -1,6 +1,8 @@
 'use strict';
 let state=null,filter='all',mode=readSetting('view','grid'),busy=false,checking=false,selected=null,lastCheck=null;
 let updatingLauncher=false,launcherProgress=null,seenUpdateResult=null;
+let guideApp=null,guideQueue=[];
+const openingApps=new Set();
 const progress=new Map();
 const $=selector=>document.querySelector(selector);
 const colors={'prompt-builder':'#eca7d7',iblock:'#2d81ff',ivolume:'#925cf6'};
@@ -36,6 +38,7 @@ function renderCard(a,index){
   const bottom=el('div','card-bottom');bottom.dataset.actionFor=a.id;
   if(progress.has(a.id)){bottom.append(phaseDisplay(a));}else{
     const menu=el('div','card-menu');menu.hidden=true;menu.setAttribute('role','menu');menu.append(button('','Dettagli dell’app',()=>{menu.hidden=true;showDetails(a);}),button('','Apri repository GitHub',()=>repository(a.id)));
+    if(a.installed&&state.platform==='darwin')menu.append(button('','Guida al primo avvio',()=>{menu.hidden=true;showLaunchGuide(a);}));
     if(a.installed&&a.update===null&&a.available&&a.osCompatible){const link=button('','Collega l’ultima release',()=>{menu.hidden=true;installApps([a]);});link.disabled=busy;menu.append(link);}
     const more=button('square','⋯',()=>{const wasHidden=menu.hidden;document.querySelectorAll('.card-menu').forEach(m=>m.hidden=true);menu.hidden=!wasHidden;more.setAttribute('aria-expanded',String(!menu.hidden));});more.setAttribute('aria-label','Altre azioni per '+a.name);more.setAttribute('aria-haspopup','menu');more.setAttribute('aria-expanded','false');bottom.append(primary(a),more);content.append(menu);
   }content.append(bottom);card.append(content);return card;
@@ -59,9 +62,38 @@ function render(){
 async function refresh(){if(busy||checking||!window.hub)return;checking=true;render();try{state=await window.hub.catalog();lastCheck=new Date();}catch(e){notice(e.message);}finally{checking=false;render();}}
 async function installApps(apps){
   if(busy||checking||!window.hub)return;busy=true;notice('');render();const errors=[],done=[];
-  try{for(const a of apps){progress.set(a.id,{phase:'Preparazione',progress:0});render();try{state={...await window.hub.install(a.id),launcher:state.launcher};done.push(a.name);}catch(e){errors.push(`${a.name}: ${e.message}`);state=await window.hub.catalog().catch(()=>state);}finally{progress.delete(a.id);render();}}lastCheck=new Date();notice([done.length?`${done.join(', ')} ${done.length===1?'è pronta':'sono pronte'}. Puoi aprire ${done.length===1?'l’app':'le app'} dal launcher.`:'',...errors].filter(Boolean).join('\n'));}finally{busy=false;render();}
+  try{for(const a of apps){progress.set(a.id,{phase:'Preparazione',progress:0});render();try{state={...await window.hub.install(a.id),launcher:state.launcher};done.push(a.name);if(state.platform==='darwin')guideQueue.push(state.apps.find(x=>x.id===a.id)||a);}catch(e){errors.push(`${a.name}: ${e.message}`);state=await window.hub.catalog().catch(()=>state);}finally{progress.delete(a.id);render();}}lastCheck=new Date();notice([done.length?`${done.join(', ')} ${done.length===1?'è installata':'sono installate'}. Completa il primo avvio con la guida qui sotto.`:'',...errors].filter(Boolean).join('\n'));}finally{busy=false;render();if(guideQueue.length)showLaunchGuide(guideQueue.shift(),'installed');}
 }
-async function openApp(a){try{await window.hub.open(a.id);}catch(e){notice(e.message);}}
+function showLaunchGuide(a,status='help',message=''){
+  if(a.type==='web'||state?.platform!=='darwin')return;
+  guideApp=a;
+  $('#launch-guide-title').textContent=status==='authorization'?`Autorizza ${a.name} in macOS`:status==='installed'?`${a.name} è installata. Completa il primo avvio.`:`Primo avvio di ${a.name}`;
+  $('#launch-guide-message').textContent=message||'macOS può chiederti di autorizzare un’app appena scaricata. Il launcher ti accompagna: la conferma si fa nelle impostazioni del Mac.';
+  $('#launch-guide-first-step').textContent=`Premi «Apri ${a.name}». Se macOS dice che lo sviluppatore non è verificato o che Apple non può verificare l’app, chiudi l’avviso con «Fine», «OK» o «Annulla» e passa alle impostazioni.`;
+  $('#launch-guide-permissions').hidden=a.id!=='ivolume';
+  $('#launch-guide-open').textContent=`Apri ${a.name}`;
+  $('#launch-guide').hidden=false;
+  $('#launch-guide-title').focus({preventScroll:true});
+  $('#launch-guide').scrollIntoView({block:'start',behavior:'instant'});
+}
+async function openApp(a){
+  if(openingApps.has(a.id))return;
+  openingApps.add(a.id);
+  if(guideApp?.id===a.id)for(const id of ['launch-guide-open','launch-guide-retry'])$('#'+id).disabled=true;
+  try{
+    const result=await window.hub.open(a.id);
+    if(result?.status==='authorization'||result?.status==='cancelled'){notice('');showLaunchGuide(a,result.status,result.message);}
+    else if(result?.status==='opened'){
+      notice('');
+      if(guideApp?.id===a.id)$('#launch-guide-message').textContent=`Richiesta di apertura inviata a ${a.name}. Se la finestra dell’app è aperta, puoi chiudere questa guida; se macOS mostra un avviso, segui i passaggi sotto.`;
+    }else if(result?.message){$('#launch-guide').hidden=true;guideApp=null;notice(result.message);}
+  }catch{
+    notice(a.type==='web'?`Non è stato possibile aprire ${a.name} nel browser. Riprova dal launcher.`:`Non è stato possibile aprire ${a.name}. Riprova dal launcher o dalla cartella Applicazioni.`);
+  }finally{
+    openingApps.delete(a.id);
+    if(guideApp?.id===a.id)for(const id of ['launch-guide-open','launch-guide-retry']){const control=$('#'+id);if(control)control.disabled=false;}
+  }
+}
 async function repository(id){try{if(id==='launcher')await window.hub.project();else await window.hub.repository(id);}catch(e){notice(e.message);}}
 async function project(){try{if(window.hub?.project)await window.hub.project();}catch(e){notice(e.message);}}
 function showDetails(a){
@@ -75,6 +107,7 @@ function showDetails(a){
   const help=$('#detail-compatibility');help.hidden=a.type==='web'||!(a.requiresRosetta||(state.platform==='win32'&&a.id!=='launcher'));
   help.textContent=state.platform==='win32'&&a.id!=='launcher'?'Questa applicazione è disponibile solo per macOS.': 'Sui Mac Intel funziona direttamente. Sui Mac Apple Silicon (M1, M2 e successivi) Rosetta permette di eseguire questa versione Intel. macOS può proporti di installarla al primo avvio.';
   const isLauncher=a.id==='launcher';
+  $('#detail-guide').hidden=isLauncher||a.type==='web'||!a.installed||state.platform!=='darwin';
   $('#detail-notes-heading').textContent=isLauncher?'Novità della versione':'Funzioni e utilizzi';
   $('#detail-notes-source').hidden=true;
   ReleaseMarkdown.render($('#detail-notes'),isLauncher?(a.notes?.trim()||'Non sono state pubblicate note per questa versione.'):(a.details||a.description),url=>window.hub?.external(url).catch(e=>notice(e.message)));
@@ -104,6 +137,11 @@ async function updateLauncher(){
   try{await window.hub.updateLauncher();}catch(e){busy=false;updatingLauncher=false;launcherProgress=null;notice(e.message);render();}
 }
 $('#launcher-update-button').addEventListener('click',updateLauncher);
+$('#detail-guide').addEventListener('click',()=>{$('#details').close();showLaunchGuide(selected);});
+$('#launch-guide-close').addEventListener('click',()=>{if(guideQueue.length)showLaunchGuide(guideQueue.shift(),'installed');else{$('#launch-guide').hidden=true;guideApp=null;}});
+for(const id of ['launch-guide-open','launch-guide-retry'])$('#'+id).addEventListener('click',()=>{if(guideApp)openApp(guideApp);});
+$('#launch-guide-settings').addEventListener('click',async()=>{try{await window.hub.privacySecurity();}catch{$('#launch-guide-message').textContent='Apri manualmente Impostazioni di Sistema → Privacy e sicurezza e scorri fino a Sicurezza.';}});
+$('#launch-guide-apple').addEventListener('click',()=>window.hub?.external('https://support.apple.com/it-it/102445').catch(()=>notice('Apri la guida Apple su support.apple.com/it-it/102445.')));
 $('#launcher-update-cancel').addEventListener('click',()=>window.hub.cancelLauncherUpdate().catch(e=>notice(e.message)));
 $('#launcher-check').addEventListener('click',refresh);
 $('#launcher-update-notes').addEventListener('click',()=>{const l=state.launcher;showDetails({id:'launcher',name:'iDom Launcher',description:'Aggiornamento del launcher. Verrà scaricato, verificato e installato prima del riavvio.',installed:{version:l.current},latest:l.latest,minimum:'13.0',notes:l.notes||''});});

@@ -39,6 +39,10 @@ else {
     handle('project',()=>shell.openExternal('https://github.com/Domenico-lel/iDom-Hub'));
     handle('info',()=>({version:require('../package.json').version}));
     handle('applications',()=>shell.openPath(path.join(require('node:os').homedir(),'Applications')));
+    handle('privacy-security',()=>{
+      if(process.platform!=='darwin')return {status:'unsupported'};
+      return shell.openExternal('x-apple.systempreferences:com.apple.preference.security?General');
+    });
     create();app.on('activate',()=>{if(BrowserWindow.getAllWindows().length===0)create();});
   });
   app.on('window-all-closed',()=>{if(process.platform!=='darwin')app.quit();});
